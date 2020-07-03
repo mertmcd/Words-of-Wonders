@@ -129,17 +129,14 @@ function startGame() {
     this.setScale(scale);
   };
 
-  let rect = this.add.rectangle(0, 0, currentWidth / 2, currentHeight / 8, 0x000000).setOrigin(0);
+  let rect = this.add.rectangle(0, 0, currentWidth, currentHeight / 12, 0x000000).setOrigin(0);
 
   rect.onResizeCallback = function (w, h) {
-    let scale = Math.min(w / this.width, h / this.height);
-
-    if (!isLandscape) {
+    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
+    console.log(scale);
+    if (!isLandscape) this.setScale(scale * 2);
+    else {
       this.setScale(scale);
-      console.log(scale);
-    } else {
-      this.setScale(scale);
-      console.log(scale);
     }
   };
 }
