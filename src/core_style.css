@@ -1,0 +1,152 @@
+#loading{
+    position:fixed;
+    margin:auto;
+    top:0;
+    bottom:0;
+    right:0;
+    left:0;
+    z-index:999;
+}
+
+*{
+    margin:0;
+    padding: 0;
+}
+
+body,html{
+    height:100%;
+    overflow: hidden;
+    
+}
+
+body{
+    background:#000000;
+    width:100%;
+    height:100%;
+ }
+
+canvas{
+    position: fixed;
+    top:0;
+    left:0;
+}
+
+
+.hide{
+    opacity: 0;
+    transition: all 0.5s;
+}
+
+
+#preloader{
+    width:100%;
+    height:100%;
+    position: absolute;
+    top:0;
+    left:0;
+    background: rgb(23,37,56);
+    background: linear-gradient(45deg, rgba(23,37,56,1) 0%, rgba(68,149,250,1) 100%);
+    
+    z-index:999;
+    pointer-events: none;
+}
+
+#preloader img{
+    position: absolute;
+    height: 80%;
+    width: auto;
+    margin: auto;
+    display: block;
+    top:0;
+    left:0;
+    right: 0;
+    bottom: 0;
+}
+
+#game-logo,#pf-logo{
+    margin: auto;
+    position: relative;
+    width:100%;
+    height:30%;
+}
+
+#pf-logo{
+    height:15%;
+    position: absolute;
+    bottom: 0;
+}
+
+#progress-bar{
+    position: relative;
+    margin: 10px auto;
+    width:50%;
+    height:5%;
+    max-height: 20px;
+}
+
+#progress-bg{
+    position: absolute;
+    width:100%;
+    height: 100%;
+    /*background: #990000;*/
+    border-radius: 20px;
+    border:5px solid #FFBA00;
+}
+
+#bar{
+    position: absolute;
+    top:0;
+    left:0;
+    width:10%;
+    height: 115%;
+    border-radius: 20px;
+    background: #ffffff;
+    margin: 4px;
+}
+
+
+#demo-loading{
+    position: relative;
+    height:15%;
+    margin: 5px;
+}
+
+#demo-loading p{
+    margin:0;
+}
+
+@media screen and (orientation:landscape) {
+    #pf-logo img{
+        left: 0;
+        right:auto;
+    }
+    
+    #game-logo{
+        margin: auto;
+        position: relative;
+        width:100%;
+        height:40%;
+    }
+
+    #preloader img{
+        height: 90%;
+    }
+    
+    #progress-bar{
+        width:50%;
+    }
+    
+    #progress-bar{
+        width:40%;
+        max-height: 30px;
+    }
+    
+    #demo-loading{
+        position: relative;
+        height:20%;
+        margin: 5px;
+    }
+}
+
+
+

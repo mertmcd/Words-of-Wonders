@@ -1,0 +1,55 @@
+ <!DOCTYPE html>
+ <html>
+
+ <head>
+     <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+     <script>
+         var loaded = 5,
+             total = 100;
+
+
+         function loadUpdate() {
+             loaded += 0.2;
+             var bar = document.getElementById("bar");
+
+             if (loaded > 101) {
+                 loaded = 101;
+             } else {
+                 setTimeout(loadUpdate, 50);
+             }
+             if (bar) {
+                 bar.style.width = loaded + "%";
+             }
+
+         };
+         setTimeout(loadUpdate, 50);
+     </script>
+
+     <style>
+         @font-face {
+             font-family: 'ui_font_1';
+             src: url('assets/fonts/font.ttf');
+         }
+     </style>
+
+     <!--<link rel="stylesheet" type="text/css" href="../../node_modules/core_style.css">-->
+     <!-- <link rel="stylesheet" type="text/css" href="src/core_style.css"> -->
+     <link rel="stylesheet" type="text/css" href="src/gear.css">
+ </head>
+
+ <body style="margin: 0px; padding: 0px; width: 100%; height: 100%; overflow: hidden;">
+     <p style="font-family: ui_font_1; position: absolute; left:-100px">.</p>
+     <div id="bg"></div>
+
+     <script src="build/vendor.main.js" charset="utf-8"></script>
+     <script src="build/main.js" charset="utf-8"></script>
+
+     <div style=' position:fixed; z-index: 5; color:white' id='asd'>
+
+     </div>
+
+
+ </body>
+
+ </html>

@@ -1,0 +1,77 @@
+/*PRELOADER */
+#preloader-gear {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgb(23, 37, 56);
+    
+    z-index: 999;
+    pointer-events: none;
+    touch-action: none;
+
+    transition: all 0.5s;
+}
+
+#gears{
+    width: 520px;
+    height: 364px;
+    position: absolute;
+    transform-origin: top left;
+}
+
+#gears img{
+    position: absolute;
+
+    
+}
+
+#gear0, #gear2{
+    animation-name: gear-anim;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+#gear0{
+    
+    left:0;
+    top:0;
+}
+
+#gear1{
+    
+    left: 104px;
+    top: 116px;
+
+    animation-name: gear-anim-reverse;
+    animation-duration: 6s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+#gear2{
+    left: 328px;
+    top: 126px;
+}
+
+@keyframes gear-anim-reverse {
+    0%   {transform:rotate(0deg);}
+    100%   {transform:rotate(-360deg);}
+}
+
+@keyframes gear-anim {
+    0%   {transform:rotate(0);}
+    100%   {transform:rotate(360deg);}
+}
+
+#pf-logo-gear{
+    max-width: 20%;
+    max-height: 20%;
+
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
