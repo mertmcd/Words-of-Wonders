@@ -68,6 +68,8 @@ let rows = boxData.length;
 let currentBox = [];
 let letters = ["B", "E", "T", "A"];
 let textLetters = [];
+let puzzleText;
+let letterCircle;
 
 let gameData = {};
 
@@ -143,12 +145,16 @@ function startGame() {
 
   // ADD SCREEN ELEMENTS
 
+  // Add background image
+
   let backGround = this.add.image(0, 0, "bg").setOrigin(0);
 
   backGround.onResizeCallback = function (w, h) {
     let scale = Math.max(w / this.width, h / this.height);
     this.setScale(scale);
   };
+
+  // Add header rectangle
 
   let rect = this.add.rectangle(0, 0, 300, 100, 0x000000).setOrigin(0);
 
@@ -158,7 +164,9 @@ function startGame() {
     else this.setScale(scale, scale / 5);
   };
 
-  let text = this.add
+  // Add header text
+
+  let header = this.add
     .text(0, 0, "Can you find 4 words?", {
       fontFamily: "ui_font_1",
       fontSize: 100,
@@ -167,18 +175,16 @@ function startGame() {
     })
     .setOrigin(0.5);
 
-  text.onResizeCallback = function () {
+  header.onResizeCallback = function () {
     let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
-    if (!isLandscape) {
-      this.setScale(scale * 0.8);
-      this.x = currentWidth / 2;
-      this.y = this.height / 2;
-    } else {
-      this.setScale(scale * 0.5);
-      this.x = currentWidth / 2;
-      this.y = this.height / 2;
-    }
+    if (!isLandscape) this.setScale(scale * 0.8);
+    else this.setScale(scale * 0.5);
+
+    this.x = currentWidth / 2;
+    this.y = this.height / 2;
   };
+
+  // Add button
 
   let button = this.add.image(0, 0, "atlas", "install0");
 
@@ -194,6 +200,8 @@ function startGame() {
     }
   };
 
+  // Add text inside the button
+
   let buttonText = this.add
     .text(0, 0, "Tap to Play!", {
       fontFamily: "ui_font_1",
@@ -205,18 +213,12 @@ function startGame() {
 
   buttonText.onResizeCallback = function () {
     let scale = Math.min((button.displayWidth * 0.6) / this.width, (button.displayHeight * 0.6) / this.height);
-    if (!isLandscape) {
-      this.setScale(scale);
-      this.y = button.y;
-      this.x = button.x;
-    } else {
-      this.setScale(scale);
-      this.y = button.y;
-      this.x = button.x;
-    }
+    this.setScale(scale);
+    this.y = button.y;
+    this.x = button.x;
   };
 
-  let tween = scene.tweens.add({
+  let buttonTween = scene.tweens.add({
     targets: button,
     duration: 600,
     ease: "Linear",
@@ -229,6 +231,8 @@ function startGame() {
     yoyo: true,
   });
 
+  // Add scoreboard
+
   let scoreBoard = this.add.image(0, 0, "atlas", "extra_word");
 
   scoreBoard.onResizeCallback = function () {
@@ -236,13 +240,15 @@ function startGame() {
     if (!isLandscape) {
       this.setScale(scale / 6);
       this.y = currentHeight / 1.15;
-      this.x = backGround.x + this.displayWidth / 2;
+      this.x = 0 + this.displayWidth / 2;
     } else {
       this.setScale(scale / 10);
       this.y = currentHeight / 1.2;
       this.x = currentWidth - this.displayWidth / 2;
     }
   };
+
+  // Add score text
 
   let score = this.add
     .text(0, 0, "0", {
@@ -260,6 +266,8 @@ function startGame() {
     this.x = scoreBoard.x + this.displayWidth / 2;
   };
 
+  // Add circle
+
   let circle = this.add.circle(0, 0, 1, 0x000000, 0.4);
 
   circle.onResizeCallback = function () {
@@ -274,30 +282,7 @@ function startGame() {
     }
   };
 
-  // let mask = this.add.image(0, 0, "atlas", "mask").setOrigin(0);
-
-  // mask.onResizeCallback = function () {
-  //   let scale = Math.max(currentWidth / this.width, currentHeight / this.height);
-  //   this.setScale(scale);
-
-  //   if (!isLandscape) {
-  //     if (squareness > 0.6) {
-  //       this.y = -this.displayHeight * 0.2;
-  //     } else {
-  //       this.y = 0;
-  //     }
-  //     this.x = 0;
-  //   } else {
-  //     let scale = currentHeight / this.height;
-
-  //     this.setScale(currentWidth / this.width, currentHeight / this.height);
-  //     this.setRotation(-Math.PI / 2);
-  //     // this.y = backGround.getTopCenter().y;
-  //     this.y = currentHeight;
-  //     this.x = currentWidth / 2.5;
-  //   }
-  //   console.log(this);
-  // };
+  // Add non-visible board
 
   let board = this.add.rectangle(0, 0, 5, 4, "0x00000");
   board.setAlpha(0.5);
@@ -318,7 +303,7 @@ function startGame() {
   board.onResizeCallback();
   board.setVisible(false);
 
-  // BOARD AND BOX ADJUSTMENTS
+  // BOX ADJUSTMENTS
 
   let box;
 
@@ -347,21 +332,24 @@ function startGame() {
   }
   // console.log(currentBox);
 
-  // DISABLE VISIBILITY OF IDLE BOXES
+  // Disable visibility of idle boxes
 
   for (let i = 0; i < boxArray.length; i++) if (!currentBox[i]) boxArray[i].setVisible(false);
+
+  // Add letters' array
 
   textLetters = [];
 
   for (let i = 0; i < letters.length; i++) {
-    let puzzleText = this.add
+    puzzleText = this.add
       .text(0, 0, letters[i], {
         fontFamily: "ui_font_1",
         fontSize: 100,
         color: "#ffffff",
         strokeThickness: 1.5,
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setDepth(2);
 
     puzzleText.onResizeCallback = function () {
       let scale = Math.min((circle.displayWidth * 0.15) / this.width, (circle.displayHeight * 0.3) / this.height);
@@ -369,6 +357,8 @@ function startGame() {
     };
     textLetters.push(puzzleText);
   }
+
+  // Add dummy resize function
 
   let dummy = this.add.rectangle(0, 0, 0, 0);
 
@@ -382,8 +372,18 @@ function startGame() {
       textLetters[i].x = radius * Math.sin(angle) + circle.getCenter().x;
     }
   };
-  // console.log(textLetters);
-  console.log(boardString);
+
+  // Add circles behind puzzle texts
+
+  for (let i = 0; i < letters.length; i++) {
+    letterCircle = this.add.circle(0, 0, 1, 0x009d00);
+
+    letterCircle.onResizeCallback = function () {
+      this.setScale(circle.scale / 4);
+      this.y = textLetters[i].getCenter().y;
+      this.x = textLetters[i].getCenter().x;
+    };
+  }
 }
 
 function updateGame(time, delta) {
