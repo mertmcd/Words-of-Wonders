@@ -50,6 +50,25 @@ let currentWidth, currentHeight, squareness, isLandscape;
 let currentTime, deltaTime;
 let main, data;
 
+let boxArray = [];
+let boxData = [
+  [0, 0, 1, 0, 1],
+  [0, 1, 1, 1, 1],
+  [0, 0, 1, 0, 1],
+  [1, 1, 1, 0, 0],
+];
+let boardString = {
+  rows: [0, 1, 3, 0],
+  columns: [2, 1, 0, 4],
+  word: ["BEAT", "BETA", "BET", "BAT"],
+  position: ["V", "H", "H", "V"],
+};
+let columns = boxData[0].length;
+let rows = boxData.length;
+let currentBox = [];
+let letters = ["B", "E", "T", "A"];
+let textLetters = [];
+
 let gameData = {};
 
 /** @type {Phaser.Scene} */
@@ -145,7 +164,6 @@ function startGame() {
       fontSize: 100,
       color: "#ffffff",
       strokeThickness: 1.5,
-      //stroke: htmlDarkGray,
     })
     .setOrigin(0.5);
 
@@ -256,6 +274,31 @@ function startGame() {
     }
   };
 
+  // let mask = this.add.image(0, 0, "atlas", "mask").setOrigin(0);
+
+  // mask.onResizeCallback = function () {
+  //   let scale = Math.max(currentWidth / this.width, currentHeight / this.height);
+  //   this.setScale(scale);
+
+  //   if (!isLandscape) {
+  //     if (squareness > 0.6) {
+  //       this.y = -this.displayHeight * 0.2;
+  //     } else {
+  //       this.y = 0;
+  //     }
+  //     this.x = 0;
+  //   } else {
+  //     let scale = currentHeight / this.height;
+
+  //     this.setScale(currentWidth / this.width, currentHeight / this.height);
+  //     this.setRotation(-Math.PI / 2);
+  //     // this.y = backGround.getTopCenter().y;
+  //     this.y = currentHeight;
+  //     this.x = currentWidth / 2.5;
+  //   }
+  //   console.log(this);
+  // };
+
   let board = this.add.rectangle(0, 0, 5, 4, "0x00000");
   board.setAlpha(0.5);
 
@@ -272,18 +315,75 @@ function startGame() {
       this.x = currentWidth / 4;
     }
   };
+  board.onResizeCallback();
+  board.setVisible(false);
 
-  console.log(board);
-  console.log(board.displayWidth);
+  // BOARD AND BOX ADJUSTMENTS
 
-  // let frames = this.add.image(0, 0, "atlas", "box");
+  let box;
 
-  // frames.onResizeCallback = function () {
-  //   let scale = currentWidth / this.width;
-  //   this.setScale(scale / 6);
-  //   this.y = currentHeight / 3;
-  //   this.x = currentWidth / 3;
-  // };
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      box = this.add.image(0, 0, "atlas", "box").setOrigin(0);
+
+      box.onResizeCallback = function () {
+        let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+        this.setScale(Math.max(scale / rows, scale / columns));
+        this.y = board.getTopLeft().y + i * this.displayHeight;
+        this.x = board.getTopLeft().x + this.displayWidth * j;
+      };
+      boxArray.push(box);
+    }
+  }
+  // console.log(boxArray);
+
+  let index;
+
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < columns; j++) {
+      index = boxData[i][j];
+      currentBox.push(index);
+    }
+  }
+  // console.log(currentBox);
+
+  // DISABLE VISIBILITY OF IDLE BOXES
+
+  for (let i = 0; i < boxArray.length; i++) if (!currentBox[i]) boxArray[i].setVisible(false);
+
+  textLetters = [];
+
+  for (let i = 0; i < letters.length; i++) {
+    let puzzleText = this.add
+      .text(0, 0, letters[i], {
+        fontFamily: "ui_font_1",
+        fontSize: 100,
+        color: "#ffffff",
+        strokeThickness: 1.5,
+      })
+      .setOrigin(0.5);
+
+    puzzleText.onResizeCallback = function () {
+      let scale = Math.min((circle.displayWidth * 0.15) / this.width, (circle.displayHeight * 0.3) / this.height);
+      this.setScale(scale);
+    };
+    textLetters.push(puzzleText);
+  }
+
+  let dummy = this.add.rectangle(0, 0, 0, 0);
+
+  dummy.onResizeCallback = function () {
+    let angle;
+    let radius = circle.radius * circle.scale - textLetters[0].displayHeight / 2;
+    for (let i = 0; i < letters.length; i++) {
+      angle = (i / (letters.length / 2)) * Math.PI;
+
+      textLetters[i].y = circle.getCenter().y - radius * Math.cos(angle);
+      textLetters[i].x = radius * Math.sin(angle) + circle.getCenter().x;
+    }
+  };
+  // console.log(textLetters);
+  console.log(boardString);
 }
 
 function updateGame(time, delta) {
@@ -291,6 +391,8 @@ function updateGame(time, delta) {
   deltaTime = delta;
 
   main.update();
+
+  let pointer = this.input.activePointer;
 }
 
 function resizeAll(w, h) {
