@@ -22,3 +22,16 @@
 //   }
 //   console.log(this);
 // };
+
+// CIRCLE TWEENS
+// for (let i = 0; i < circleArray.length; i++) {
+//   let clickTween = scene.tweens.add({
+//     targets: letterCircle[i],
+//     duration: 600,
+//     ease: "Linear",
+//     repeat: -1,
+//     scaleX: {from: letterCircle.scaleX * 0, to: letterCircle.scaleX},
+//     scaleY: {from: letterCircle.scaleY * 0, to: letterCircle.scaleY},
+//     yoyo: true,
+//   });
+// }

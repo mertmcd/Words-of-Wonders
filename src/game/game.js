@@ -375,6 +375,8 @@ function startGame() {
 
   // Add circles behind puzzle texts
 
+  let circleArray = [];
+
   for (let i = 0; i < letters.length; i++) {
     letterCircle = this.add.circle(0, 0, 1, 0x009d00);
 
@@ -383,6 +385,7 @@ function startGame() {
       this.y = textLetters[i].getCenter().y;
       this.x = textLetters[i].getCenter().x;
     };
+    circleArray.push(letterCircle);
   }
 }
 
