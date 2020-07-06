@@ -9,6 +9,8 @@ var scene;
 import atlasSrc from "../../assets/atlas.png";
 import atlasJson from "../../assets/atlas.json";
 import bgSrc from "../../assets/bg.jpg";
+import buttonSrc from "../../assets/button.png";
+import rectSrc from "../../assets/rect.png";
 
 assetManager.loadAssets = function (main, callback) {
   ////load image type first if there is any
@@ -23,6 +25,16 @@ assetManager.loadAssets = function (main, callback) {
       type: "image",
       src: bgSrc,
       key: "bg",
+    },
+    {
+      type: "image",
+      src: buttonSrc,
+      key: "button",
+    },
+    {
+      type: "image",
+      src: rectSrc,
+      key: "rect",
     },
   ];
 
