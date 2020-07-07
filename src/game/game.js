@@ -77,6 +77,7 @@ let letterCircle;
 let colorCircle;
 let hand;
 let timeline;
+let clickedLetters;
 
 let gameData = {};
 
@@ -431,7 +432,9 @@ function startGame() {
   handTimeline();
   console.log(textLetters);
 
-  // Adds green circle tweens when letters are selected and checks whether the letters are selected or not
+  // Adds green circle tweens and small sized letters when letters are selected and checks whether the letters are selected or not
+
+  let clickedLettersArray = [];
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
@@ -449,7 +452,7 @@ function startGame() {
         yoyo: false,
       });
 
-      let clickedLetters = scene.add
+      clickedLetters = scene.add
         .text(0, 0, textLetters[i].text, {
           fontFamily: "ui_font_1",
           fontSize: 100,
@@ -471,15 +474,16 @@ function startGame() {
       };
       clickedLetters.onResizeCallback();
     });
+    clickedLettersArray.push(clickedLetters);
+    console.log(clickedLettersArray);
   }
 
-  // Removes green circle tweens when the pointer is up
+  // Removes green circle tweens and small sized letters when the pointer is up
 
   this.input.on("pointerup", function (pointer) {
     //console.log("mert");
-    for (let items of circleArray) {
-      items.isSelected = false;
-    }
+
+    for (let items of circleArray) items.isSelected = false;
 
     for (let circles of colorCircleArray) {
       scene.tweens.add({
