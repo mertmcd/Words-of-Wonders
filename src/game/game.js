@@ -74,6 +74,7 @@ let letters = ["B", "E", "T", "A"];
 let textLetters = [];
 let puzzleText;
 let letterCircle;
+let colorCircle;
 let hand;
 let timeline;
 
@@ -151,7 +152,7 @@ function startGame() {
 
   // ADD SCREEN ELEMENTS
 
-  // Add background image
+  // Adds background image
 
   let backGround = this.add.image(0, 0, "bg").setOrigin(0);
 
@@ -160,7 +161,7 @@ function startGame() {
     this.setScale(scale);
   };
 
-  // Add header rectangle
+  // Adds header rectangle
 
   let rect = this.add.rectangle(0, 0, 300, 100, 0x000000).setOrigin(0);
 
@@ -170,7 +171,7 @@ function startGame() {
     else this.setScale(scale, scale / 5);
   };
 
-  // Add header text
+  // Adds header text
 
   let header = this.add
     .text(0, 0, "Can you find 4 words?", {
@@ -190,7 +191,7 @@ function startGame() {
     this.y = this.height / 2;
   };
 
-  // Add button
+  // Adds button
 
   let button = this.add.image(0, 0, "atlas", "install0");
 
@@ -206,7 +207,7 @@ function startGame() {
     }
   };
 
-  // Add text inside the button
+  // Adds text inside the button and its tween
 
   let buttonText = this.add
     .text(0, 0, "Tap to Play!", {
@@ -237,7 +238,7 @@ function startGame() {
     yoyo: true,
   });
 
-  // Add scoreboard
+  // Adds scoreboard
 
   let scoreBoard = this.add.image(0, 0, "atlas", "extra_word");
 
@@ -254,7 +255,7 @@ function startGame() {
     }
   };
 
-  // Add score text
+  // Adds score text
 
   let score = this.add
     .text(0, 0, "0", {
@@ -272,7 +273,7 @@ function startGame() {
     this.x = scoreBoard.x + this.displayWidth / 2;
   };
 
-  // Add circle
+  // Adds faded circle
 
   let circle = this.add.circle(0, 0, 1, 0x000000, 0.4);
 
@@ -289,7 +290,7 @@ function startGame() {
   };
   circle.onResizeCallback();
 
-  // Add non-visible board
+  // Adds non-visible board for to scale puzzle area and boxes
 
   let board = this.add.rectangle(0, 0, 5, 4, "0x00000");
   board.setAlpha(0.5);
@@ -327,7 +328,6 @@ function startGame() {
       boxArray.push(box);
     }
   }
-  // console.log(boxArray);
 
   let index;
 
@@ -337,13 +337,12 @@ function startGame() {
       currentBox.push(index);
     }
   }
-  // console.log(currentBox);
 
-  // Disable visibility of idle boxes
+  // Disables visibility of idle boxes
 
   for (let i = 0; i < boxArray.length; i++) if (!currentBox[i]) boxArray[i].setVisible(false);
 
-  // Add letters' array
+  // Adds letters' array
 
   textLetters = [];
 
@@ -365,7 +364,7 @@ function startGame() {
     textLetters.push(puzzleText);
   }
 
-  // Add dummy resize function
+  // Adds dummy resize function only for to scale letters positiob on the faded circle
 
   let dummy = this.add.rectangle(0, 0, 0, 0);
 
@@ -382,7 +381,7 @@ function startGame() {
 
   dummy.onResizeCallback();
 
-  //Add circles behind puzzle texts
+  // Adds circles behind puzzle texts
 
   let circleArray = [];
 
@@ -402,12 +401,12 @@ function startGame() {
     circleArray[i].isSelected = false;
   }
 
-  // Add green circles of letters' background for tween
+  // Adds green circles of letters' background for tween
 
   let colorCircleArray = [];
 
   for (let i = 0; i < letters.length; i++) {
-    let colorCircle = this.add.circle(0, 0, 1, 0x009d00);
+    colorCircle = this.add.circle(0, 0, 1, 0x009d00);
 
     colorCircle.onResizeCallback = function () {
       this.setScale(0.1);
@@ -419,7 +418,7 @@ function startGame() {
     colorCircleArray[i].setVisible(true);
   }
 
-  // Add hand tutorial
+  // Adds hand tutorial
 
   hand = this.add.image(0, 0, "atlas", "hand0").setDepth(2);
 
@@ -430,6 +429,8 @@ function startGame() {
     hand.x = textLetters[0].getBottomCenter().x;
   };
   handTimeline();
+
+  // Adds green circle tweens when letters are selected and checks whether the letters are selected or not
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
@@ -449,19 +450,22 @@ function startGame() {
     });
   }
 
+  // Removes green circle tweens when the pointer is up
+
   this.input.on("pointerup", function (pointer) {
-    console.log("mert");
-    for (let lt of circleArray) {
-      lt.isSelected = false;
+    //console.log("mert");
+    for (let items of circleArray) {
+      items.isSelected = false;
     }
-    for (let clt of colorCircleArray) {
+
+    for (let circles of colorCircleArray) {
       scene.tweens.add({
-        targets: clt,
+        targets: circles,
         duration: 100,
         ease: "Linear",
         repeat: 0,
-        scaleX: {from: clt.scaleX, to: 0},
-        scaleY: {from: clt.scaleX, to: 0},
+        scaleX: {from: circles.scaleX, to: 0},
+        scaleY: {from: circles.scaleX, to: 0},
         yoyo: false,
       });
     }
