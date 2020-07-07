@@ -35,3 +35,18 @@
 //     yoyo: true,
 //   });
 // }
+
+// Add circles behind puzzle texts
+
+// let circleArray = [];
+
+// for (let i = 0; i < letters.length; i++) {
+//   letterCircle = this.add.circle(0, 0, 1, 0x009d00);
+
+//   letterCircle.onResizeCallback = function () {
+//     this.setScale(circle.scale / 4);
+//     this.y = textLetters[i].getCenter().y;
+//     this.x = textLetters[i].getCenter().x;
+//   };
+//   circleArray.push(letterCircle);
+// }

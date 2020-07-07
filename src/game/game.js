@@ -58,8 +58,12 @@ let boxData = [
   [1, 1, 1, 0, 0],
 ];
 let boardString = {
-  rows: [0, 1, 3, 0],
-  columns: [2, 1, 0, 4],
+  startBox: [
+    [0, 2],
+    [1, 1],
+    [3, 0],
+    [0, 4],
+  ],
   word: ["BEAT", "BETA", "BET", "BAT"],
   position: ["V", "H", "H", "V"],
 };
@@ -70,6 +74,8 @@ let letters = ["B", "E", "T", "A"];
 let textLetters = [];
 let puzzleText;
 let letterCircle;
+let hand;
+let timeline;
 
 let gameData = {};
 
@@ -281,6 +287,7 @@ function startGame() {
       this.x = currentWidth / 1.35;
     }
   };
+  circle.onResizeCallback();
 
   // Add non-visible board
 
@@ -373,20 +380,136 @@ function startGame() {
     }
   };
 
-  // Add circles behind puzzle texts
+  dummy.onResizeCallback();
+
+  //Add circles behind puzzle texts
 
   let circleArray = [];
 
   for (let i = 0; i < letters.length; i++) {
-    letterCircle = this.add.circle(0, 0, 1, 0x009d00);
+    letterCircle = this.add.circle(0, 0, 1, 0x009d00).setAlpha(0.01);
 
     letterCircle.onResizeCallback = function () {
       this.setScale(circle.scale / 4);
       this.y = textLetters[i].getCenter().y;
       this.x = textLetters[i].getCenter().x;
     };
+    letterCircle.onResizeCallback();
+    letterCircle.text = textLetters[i];
     circleArray.push(letterCircle);
+    circleArray[i].setVisible(true);
+    circleArray[i].setInteractive();
+    circleArray[i].isSelected = false;
   }
+
+  // Add green circles of letters' background for tween
+
+  let colorCircleArray = [];
+
+  for (let i = 0; i < letters.length; i++) {
+    let colorCircle = this.add.circle(0, 0, 1, 0x009d00);
+
+    colorCircle.onResizeCallback = function () {
+      this.setScale(0.1);
+      this.y = textLetters[i].getCenter().y;
+      this.x = textLetters[i].getCenter().x;
+    };
+    colorCircle.onResizeCallback();
+    colorCircleArray.push(colorCircle);
+    colorCircleArray[i].setVisible(true);
+  }
+
+  // Add hand tutorial
+
+  hand = this.add.image(0, 0, "atlas", "hand0").setDepth(2);
+
+  hand.onResizeCallback = function () {
+    let scale = Math.min((currentWidth * 0.12) / this.width, (currentHeight * 0.15) / this.height);
+    this.setScale(scale);
+    hand.y = textLetters[0].getBottomCenter().y;
+    hand.x = textLetters[0].getBottomCenter().x;
+  };
+  handTimeline();
+
+  for (let i = 0; i < letters.length; i++) {
+    circleArray[i].on("pointerover", function (pointer) {
+      if (circleArray[i].isSelected) return;
+      console.log(textLetters[i].text);
+      circleArray[i].isSelected = true;
+
+      let clickTween = scene.tweens.add({
+        targets: colorCircleArray[i],
+        duration: 100,
+        ease: "Linear",
+        repeat: 0,
+        scaleX: {from: 0, to: letterCircle.scaleX},
+        scaleY: {from: 0, to: letterCircle.scaleY},
+        yoyo: false,
+      });
+    });
+  }
+
+  this.input.on("pointerup", function (pointer) {
+    console.log("mert");
+    for (let lt of circleArray) {
+      lt.isSelected = false;
+    }
+    for (let clt of colorCircleArray) {
+      scene.tweens.add({
+        targets: clt,
+        duration: 100,
+        ease: "Linear",
+        repeat: 0,
+        scaleX: {from: clt.scaleX, to: 0},
+        scaleY: {from: clt.scaleX, to: 0},
+        yoyo: false,
+      });
+    }
+  });
+}
+
+function handTimeline() {
+  timeline = scene.tweens.createTimeline();
+  timeline.loop = -1;
+
+  timeline.add({
+    targets: hand,
+    ease: "Linear",
+    duration: 700,
+    alpha: {from: 0, to: 1},
+    repeat: 0,
+    yoyo: false,
+    onStart: function () {
+      hand.y = textLetters[0].getBottomCenter().y;
+      hand.x = textLetters[0].getBottomCenter().x;
+    },
+  });
+
+  for (let i = 1; i < letters.length; i++) {
+    timeline.add({
+      targets: hand,
+      y: textLetters[i].getBottomCenter().y,
+      x: textLetters[i].getBottomCenter().x,
+      ease: "Linear",
+      duration: 700,
+      repeat: 0,
+      yoyo: false,
+    });
+  }
+
+  timeline.add({
+    targets: hand,
+    ease: "Linear",
+    duration: 1000,
+    alpha: {from: 1, to: 0},
+    repeat: 0,
+    yoyo: false,
+    onComplete: function () {
+      hand.y = textLetters[0].getBottomCenter().y;
+      hand.x = textLetters[0].getBottomCenter().x;
+    },
+  });
+  timeline.play();
 }
 
 function updateGame(time, delta) {
@@ -396,6 +519,11 @@ function updateGame(time, delta) {
   main.update();
 
   let pointer = this.input.activePointer;
+
+  if (pointer.isDown) {
+    timeline.stop();
+    hand.destroy();
+  }
 }
 
 function resizeAll(w, h) {
