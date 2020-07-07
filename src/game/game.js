@@ -473,15 +473,17 @@ function startGame() {
         }
       };
       clickedLetters.onResizeCallback();
+      clickedLettersArray.push(clickedLetters);
+      console.log(clickedLettersArray);
     });
-    clickedLettersArray.push(clickedLetters);
-    console.log(clickedLettersArray);
   }
 
   // Removes green circle tweens and small sized letters when the pointer is up
 
   this.input.on("pointerup", function (pointer) {
     //console.log("mert");
+
+    for (let lt of clickedLettersArray) lt.destroy();
 
     for (let items of circleArray) items.isSelected = false;
 
