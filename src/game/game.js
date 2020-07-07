@@ -429,6 +429,7 @@ function startGame() {
     hand.x = textLetters[0].getBottomCenter().x;
   };
   handTimeline();
+  console.log(textLetters);
 
   // Adds green circle tweens when letters are selected and checks whether the letters are selected or not
 
@@ -447,6 +448,28 @@ function startGame() {
         scaleY: {from: 0, to: letterCircle.scaleY},
         yoyo: false,
       });
+
+      let clickedLetters = scene.add
+        .text(0, 0, textLetters[i].text, {
+          fontFamily: "ui_font_1",
+          fontSize: 100,
+          color: "#ffffff",
+          strokeThickness: 1.5,
+        })
+        .setOrigin(0);
+
+      clickedLetters.onResizeCallback = function () {
+        let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+        this.setScale(Math.max((scale * 0.5) / rows, (scale * 0.5) / columns));
+        if (!isLandscape) {
+          this.y = currentHeight / 2;
+          this.x = currentWidth / 2 + i * this.displayWidth;
+        } else {
+          this.y = currentHeight / 6;
+          this.x = currentWidth / 1.5 + i * this.displayWidth;
+        }
+      };
+      clickedLetters.onResizeCallback();
     });
   }
 
