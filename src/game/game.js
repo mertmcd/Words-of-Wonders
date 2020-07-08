@@ -57,15 +57,45 @@ let boxData = [
   [0, 0, 1, 0, 1],
   [1, 1, 1, 0, 0],
 ];
-let boardString = {
-  startBox: [
-    [0, 2],
-    [1, 1],
-    [3, 0],
-    [0, 4],
-  ],
-  word: ["BEAT", "BETA", "BET", "BAT"],
-  position: ["V", "H", "H", "V"],
+let words = {
+  BEAT: {
+    position: "V",
+    pos: [0, 2],
+    inGrid: true,
+  },
+  BETA: {
+    position: "H",
+    pos: [1, 1],
+    inGrid: true,
+  },
+  BET: {
+    position: "H",
+    pos: [3, 0],
+    inGrid: true,
+  },
+  BAT: {
+    position: "V",
+    pos: [0, 4],
+    inGrid: true,
+  },
+  EAT: {
+    inGrid: false,
+  },
+  TEA: {
+    inGrid: false,
+  },
+  TAB: {
+    inGrid: false,
+  },
+  ATE: {
+    inGrid: false,
+  },
+  BATE: {
+    inGrid: false,
+  },
+  ABET: {
+    inGrid: false,
+  },
 };
 let columns = boxData[0].length;
 let rows = boxData.length;
@@ -78,6 +108,7 @@ let colorCircle;
 let hand;
 let timeline;
 let clickedLetters;
+let rects;
 
 let gameData = {};
 
@@ -164,12 +195,12 @@ function startGame() {
 
   // Adds header rectangle
 
-  let rect = this.add.rectangle(0, 0, 300, 100, 0x000000).setOrigin(0);
+  let rect = this.add.rectangle(0, 0, 2, 1, 0x000000).setOrigin(0);
 
-  rect.onResizeCallback = function (w, h) {
-    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
-    if (!isLandscape) this.setScale(scale, scale / 3);
-    else this.setScale(scale, scale / 5);
+  rect.onResizeCallback = function () {
+    let scale = Math.max(currentWidth / this.width, currentHeight / this.height);
+    if (!isLandscape) this.setScale(scale, scale / 15);
+    else this.setScale(scale, scale / 8);
   };
 
   // Adds header text
@@ -276,13 +307,13 @@ function startGame() {
 
   // Adds faded circle
 
-  let circle = this.add.circle(0, 0, 1, 0x000000, 0.4);
+  let circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
 
   circle.onResizeCallback = function () {
     let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
     this.setScale(scale * 0.6);
     if (!isLandscape) {
-      this.y = currentHeight / 1.4;
+      this.y = currentHeight / 1.35;
       this.x = currentWidth / 2;
     } else {
       this.y = currentHeight / 1.8;
@@ -297,14 +328,14 @@ function startGame() {
   board.setAlpha(0.5);
 
   board.onResizeCallback = function () {
-    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
+    let scale = Math.min((currentWidth * 0.8) / this.width, (currentHeight * 0.8) / this.height);
 
     if (!isLandscape) {
-      this.setScale(scale * 0.8);
-      this.y = currentHeight / 4;
+      this.setScale(scale);
+      this.y = currentHeight / 3.5;
       this.x = currentWidth / 2;
     } else {
-      this.setScale(scale * 0.7);
+      this.setScale(scale * 0.8);
       this.y = currentHeight / 1.8;
       this.x = currentWidth / 4;
     }
@@ -364,6 +395,7 @@ function startGame() {
     };
     textLetters.push(puzzleText);
   }
+  console.log(textLetters);
 
   // Adds dummy resize function only for to scale letters positiob on the faded circle
 
@@ -430,16 +462,16 @@ function startGame() {
     hand.x = textLetters[0].getBottomCenter().x;
   };
   handTimeline();
-  console.log(textLetters);
 
   // Adds green circle tweens and small sized letters when letters are selected and checks whether the letters are selected or not
 
+  let displayedLettersArray = [];
   let clickedLettersArray = [];
+  let rectArray = [];
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
       if (circleArray[i].isSelected) return;
-      console.log(textLetters[i].text);
       circleArray[i].isSelected = true;
 
       let clickTween = scene.tweens.add({
@@ -452,6 +484,24 @@ function startGame() {
         yoyo: false,
       });
 
+      rects = scene.add.rectangle(0, 0, 1, 1, 0x009d00).setOrigin(0.5);
+
+      rects.onResizeCallback = function () {
+        let scale = Math.min((currentWidth * 0.25) / this.width, (currentHeight * 0.25) / this.height);
+        this.setScale(scale / 2.5);
+        if (!isLandscape) {
+          this.y = currentHeight / 1.9;
+          this.x = circle.x + displayedLettersArray.length * 80;
+          console.log();
+        } else {
+          this.y = currentHeight / 5;
+          this.x = circle.x + displayedLettersArray.length * 80;
+        }
+      };
+      rects.onResizeCallback();
+      rectArray.push(rects);
+      console.log(rectArray);
+
       clickedLetters = scene.add
         .text(0, 0, textLetters[i].text, {
           fontFamily: "ui_font_1",
@@ -459,31 +509,31 @@ function startGame() {
           color: "#ffffff",
           strokeThickness: 1.5,
         })
-        .setOrigin(0);
+        .setOrigin(0.5);
 
       clickedLetters.onResizeCallback = function () {
         let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
-        this.setScale(Math.max((scale * 0.5) / rows, (scale * 0.5) / columns));
+        this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
         if (!isLandscape) {
-          this.y = currentHeight / 2;
-          this.x = currentWidth / 2 + i * this.displayWidth;
+          this.y = rects.getCenter().y;
+          this.x = rects.getCenter().x;
         } else {
-          this.y = currentHeight / 6;
-          this.x = currentWidth / 1.5 + i * this.displayWidth;
+          this.y = rects.getCenter().y;
+          this.x = rects.getCenter().x;
         }
       };
       clickedLetters.onResizeCallback();
-      clickedLettersArray.push(clickedLetters);
-      console.log(clickedLettersArray);
+      displayedLettersArray.push(clickedLetters);
+      clickedLettersArray.push(clickedLetters.text);
     });
   }
 
   // Removes green circle tweens and small sized letters when the pointer is up
 
   this.input.on("pointerup", function (pointer) {
-    //console.log("mert");
+    for (let letter of displayedLettersArray) letter.destroy();
 
-    for (let lt of clickedLettersArray) lt.destroy();
+    for (let rcts of rectArray) rcts.destroy();
 
     for (let items of circleArray) items.isSelected = false;
 
@@ -498,8 +548,18 @@ function startGame() {
         yoyo: false,
       });
     }
+
+    let selectedWord = clickedLettersArray.reduce((current, next) => current + next);
+
+    displayedLettersArray = [];
+    clickedLettersArray = [];
+    rectArray = [];
+
+    console.log(selectedWord);
   });
 }
+
+function slideLetter() {}
 
 function handTimeline() {
   timeline = scene.tweens.createTimeline();
