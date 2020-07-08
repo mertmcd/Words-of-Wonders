@@ -108,7 +108,16 @@ let colorCircle;
 let hand;
 let timeline;
 let clickedLetters;
+let clickedLettersArray;
 let rects;
+let rectArray;
+let displayedLettersArray;
+let graphics;
+let line;
+let lineX;
+let lineY;
+let circleArray;
+let n = 0;
 
 let gameData = {};
 
@@ -290,7 +299,7 @@ function startGame() {
   // Adds score text
 
   let score = this.add
-    .text(0, 0, "0", {
+    .text(0, 0, n, {
       fontFamily: "ui_font_1",
       fontSize: 100,
       color: "#000000",
@@ -395,7 +404,6 @@ function startGame() {
     };
     textLetters.push(puzzleText);
   }
-  console.log(textLetters);
 
   // Adds dummy resize function only for to scale letters positiob on the faded circle
 
@@ -416,7 +424,7 @@ function startGame() {
 
   // Adds circles behind puzzle texts
 
-  let circleArray = [];
+  circleArray = [];
 
   for (let i = 0; i < letters.length; i++) {
     letterCircle = this.add.circle(0, 0, 1, 0x009d00).setAlpha(0.01);
@@ -465,9 +473,9 @@ function startGame() {
 
   // Adds green circle tweens and small sized letters when letters are selected and checks whether the letters are selected or not
 
-  let displayedLettersArray = [];
-  let clickedLettersArray = [];
-  let rectArray = [];
+  displayedLettersArray = [];
+  clickedLettersArray = [];
+  rectArray = [];
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
@@ -492,7 +500,6 @@ function startGame() {
         if (!isLandscape) {
           this.y = currentHeight / 1.9;
           this.x = circle.x + displayedLettersArray.length * 80;
-          console.log();
         } else {
           this.y = currentHeight / 5;
           this.x = circle.x + displayedLettersArray.length * 80;
@@ -500,7 +507,6 @@ function startGame() {
       };
       rects.onResizeCallback();
       rectArray.push(rects);
-      console.log(rectArray);
 
       clickedLetters = scene.add
         .text(0, 0, textLetters[i].text, {
@@ -525,15 +531,30 @@ function startGame() {
       clickedLetters.onResizeCallback();
       displayedLettersArray.push(clickedLetters);
       clickedLettersArray.push(clickedLetters.text);
+
+      // graphics = scene.add.graphics({lineStyle: {width: 4, color: 0xaa00aa}, fillStyle: {color: 0x0000aa}});
+
+      // line = new Phaser.Geom.Line(circleArray[i].x, circleArray[i].y, circleArray[i].x, circleArray[i].y);
+
+      // line.x2 = pointer.x;
+      // line.y2 = pointer.y;
     });
   }
-
   // Removes green circle tweens and small sized letters when the pointer is up
 
   this.input.on("pointerup", function (pointer) {
-    for (let letter of displayedLettersArray) letter.destroy();
+    let selectedWord = clickedLettersArray.reduce((current, next) => current + next);
+    console.log(words[selectedWord]);
 
-    for (let rcts of rectArray) rcts.destroy();
+    if (!words[selectedWord]) {
+      nonGridWords();
+    } else if (!words[selectedWord].inGrid) {
+      nonGridWords();
+      n += 1;
+      console.log(n);
+    } else {
+      gridWords();
+    }
 
     for (let items of circleArray) items.isSelected = false;
 
@@ -548,17 +569,37 @@ function startGame() {
         yoyo: false,
       });
     }
-
-    let selectedWord = clickedLettersArray.reduce((current, next) => current + next);
-
-    displayedLettersArray = [];
-    clickedLettersArray = [];
-    rectArray = [];
-
-    console.log(selectedWord);
   });
 }
 
+function nonGridWords() {
+  for (let lttrs of displayedLettersArray) lttrs.destroy();
+  for (let rcts of rectArray) rcts.destroy();
+
+  displayedLettersArray = [];
+  clickedLettersArray = [];
+  rectArray = [];
+}
+
+function gridWords() {
+  let wordTween = scene.tweens.add({
+    targets: rectArray,
+    duration: 1000,
+    ease: "Linear",
+    repeat: 0,
+    scaleX: {from: rects.scaleX, to: rects.scaleX * 1.2},
+    scaleY: {from: rects.scaleY, to: rects.scaleY * 1.2},
+    yoyo: false,
+    onComplete: function () {
+      for (let lttrs of displayedLettersArray) lttrs.destroy();
+      for (let rcts of rectArray) rcts.destroy();
+
+      clickedLettersArray = [];
+      displayedLettersArray = [];
+      rectArray = [];
+    },
+  });
+}
 function slideLetter() {}
 
 function handTimeline() {
