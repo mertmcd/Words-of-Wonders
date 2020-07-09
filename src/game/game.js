@@ -118,6 +118,9 @@ let lineX;
 let lineY;
 let circleArray;
 let n = 0;
+let lineGfx;
+let pointerGfx;
+let firstLetter;
 
 let gameData = {};
 
@@ -477,6 +480,11 @@ function startGame() {
   clickedLettersArray = [];
   rectArray = [];
 
+  lineGfx = scene.add.graphics();
+  lineGfx.lineStyle(16, 0x009d00, 1);
+
+  pointerGfx = scene.add.graphics();
+
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
       if (circleArray[i].isSelected) return;
@@ -491,6 +499,17 @@ function startGame() {
         scaleY: {from: 0, to: letterCircle.scaleY},
         yoyo: false,
       });
+
+      if (!firstLetter) {
+        lineGfx.beginPath();
+        lineGfx.moveTo(circleArray[i].x, circleArray[i].y);
+      } else {
+        lineGfx.lineTo(circleArray[i].x, circleArray[i].y);
+      }
+
+      lineGfx.strokePath();
+
+      firstLetter = circleArray[i];
 
       rects = scene.add.rectangle(0, 0, 1, 1, 0x009d00).setOrigin(0.5);
 
@@ -543,6 +562,7 @@ function startGame() {
   // Removes green circle tweens and small sized letters when the pointer is up
 
   this.input.on("pointerup", function (pointer) {
+    console.log(clickedLettersArray);
     let selectedWord = clickedLettersArray.reduce((current, next) => current + next);
     console.log(words[selectedWord]);
 
@@ -553,7 +573,7 @@ function startGame() {
       n += 1;
       console.log(n);
     } else {
-      gridWords();
+      gridWords(words[selectedWord]);
     }
 
     for (let items of circleArray) items.isSelected = false;
@@ -569,6 +589,11 @@ function startGame() {
         yoyo: false,
       });
     }
+
+    lineGfx.clear();
+    lineGfx.lineStyle(16, 0x009d00, 1);
+    pointerGfx.clear();
+    firstLetter = undefined;
   });
 }
 
@@ -581,24 +606,86 @@ function nonGridWords() {
   rectArray = [];
 }
 
-function gridWords() {
-  let wordTween = scene.tweens.add({
+function gridWords(wordObj) {
+  let timeline = scene.tweens.createTimeline();
+
+  timeline.add({
     targets: rectArray,
-    duration: 1000,
+    duration: 500,
     ease: "Linear",
     repeat: 0,
     scaleX: {from: rects.scaleX, to: rects.scaleX * 1.2},
     scaleY: {from: rects.scaleY, to: rects.scaleY * 1.2},
-    yoyo: false,
+    yoyo: true,
+    onStart: function () {
+      scene.tweens.add({
+        targets: displayedLettersArray,
+        duration: 500,
+        ease: "Linear",
+        repeat: 0,
+        scaleX: {from: displayedLettersArray[0].scaleX * 1, to: displayedLettersArray[0].scaleX * 0.8},
+        scaleY: {from: displayedLettersArray[0].scaleY * 1, to: displayedLettersArray[0].scaleY * 0.8},
+        yoyo: true,
+      });
+    },
     onComplete: function () {
-      for (let lttrs of displayedLettersArray) lttrs.destroy();
-      for (let rcts of rectArray) rcts.destroy();
-
-      clickedLettersArray = [];
-      displayedLettersArray = [];
-      rectArray = [];
+      //for (let lttrs of displayedLettersArray) lttrs.destroy();
+      //for (let rcts of rectArray) rcts.destroy();
+      //clickedLettersArray = [];
+      //displayedLettersArray = [];
+      //rectArray = [];
     },
   });
+
+  let increment = 0;
+  for (let letter of displayedLettersArray) {
+    boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1]].setTintFill(0x000000);
+    timeline.add({
+      targets: letter,
+      x: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().x,
+      y: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().y,
+      duration: 500,
+      ease: "Linear",
+      onComplete: function () {},
+    });
+    if (wordObj.position === "H") {
+      increment++;
+      console.log("hhhh");
+    } else {
+      increment += boxData[0].length;
+    }
+  }
+  timeline.add({
+    targets: rectArray,
+    duration: 500,
+    ease: "Linear",
+    repeat: 0,
+    //scaleX: {from: rects.scaleX, to: rects.scaleX * 1.6},
+    scaleY: {from: rects.scaleY, to: rects.scaleY * 1.6},
+    alpha: {from: 1, to: 0},
+    yoyo: false,
+    onStart: function () {},
+  });
+
+  // let tween = scene.tweens.add({
+  //   targets: rectArray,
+  //   duration: 1000,
+  //   ease: "Linear",
+  //   repeat: 0,
+  //   scaleX: {from: rects.scaleX, to: rects.scaleX * 1.2},
+  //   scaleY: {from: rects.scaleY, to: rects.scaleY * 1.2},
+  //   yoyo: false,
+  //   onComplete: function () {
+  //     for (let lttrs of displayedLettersArray) lttrs.destroy();
+  //     for (let rcts of rectArray) rcts.destroy();
+
+  //     clickedLettersArray = [];
+  //     displayedLettersArray = [];
+  //     rectArray = [];
+  //   },
+  // });
+
+  timeline.play();
 }
 function slideLetter() {}
 
@@ -657,6 +744,9 @@ function updateGame(time, delta) {
   if (pointer.isDown) {
     timeline.stop();
     hand.destroy();
+  }
+  if (firstLetter) {
+    pointerGfx.clear().lineStyle(10, 0x009d00).lineBetween(firstLetter.x, firstLetter.y, pointer.x, pointer.y);
   }
 }
 
