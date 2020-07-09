@@ -100,6 +100,7 @@ let words = {
 let columns = boxData[0].length;
 let rows = boxData.length;
 let currentBox = [];
+let board;
 let letters = ["B", "E", "T", "A"];
 let textLetters = [];
 let puzzleText;
@@ -347,7 +348,7 @@ function startGame() {
 
   // Adds non-visible board for to scale puzzle area and boxes
 
-  let board = this.add.rectangle(0, 0, 5, 4, "0x00000");
+  board = this.add.rectangle(0, 0, 5, 4, "0x00000");
   board.setAlpha(0.5);
 
   board.onResizeCallback = function () {
@@ -551,13 +552,8 @@ function startGame() {
       clickedLetters.onResizeCallback = function () {
         let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
         this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
-        if (!isLandscape) {
-          this.y = rects.getCenter().y;
-          this.x = rects.getCenter().x;
-        } else {
-          this.y = rects.getCenter().y;
-          this.x = rects.getCenter().x;
-        }
+        this.y = rects.getCenter().y;
+        this.x = rects.getCenter().x;
       };
       clickedLetters.onResizeCallback();
       displayedLettersArray.push(clickedLetters);
@@ -723,6 +719,14 @@ function gridWords(wordObj) {
       ease: "Linear",
       onStart: function () {
         paint.setTintFill(green);
+      },
+      onComplete: function () {
+        letter.onResizeCallback = function () {
+          let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+          this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
+          this.y = paint.getCenter().y;
+          this.x = paint.getCenter().x;
+        };
       },
     });
 
