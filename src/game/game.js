@@ -214,9 +214,15 @@ function startGame() {
   let rect = this.add.rectangle(0, 0, 2, 1, 0x000000).setOrigin(0);
 
   rect.onResizeCallback = function () {
-    let scale = Math.max(currentWidth / this.width, currentHeight / this.height);
-    if (!isLandscape) this.setScale(scale, scale / 15);
-    else this.setScale(scale, scale / 8);
+    let scaleX = currentWidth / this.width;
+    let scaleY;
+    if (!isLandscape) scaleY = (currentHeight * 0.07) / this.height;
+    else scaleY = (currentHeight * 0.13) / this.height;
+
+    this.setScale(scaleX, scaleY);
+
+    // if (!isLandscape) this.setScale(scale, scale / 15);
+    // else this.setScale(scale, scale / 8);
   };
 
   // Adds header text
@@ -231,13 +237,31 @@ function startGame() {
     .setOrigin(0.5);
 
   header.onResizeCallback = function () {
-    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
-    if (!isLandscape) this.setScale(scale * 0.8);
-    else this.setScale(scale * 0.5);
+    let scale = Math.min((rect.displayWidth * 0.8) / this.width, (rect.displayHeight * 0.8) / this.height);
+    if (!isLandscape) this.setScale(scale);
+    else this.setScale(scale);
 
-    this.x = currentWidth / 2;
-    this.y = this.height / 2;
+    this.x = rect.getCenter().x;
+    this.y = rect.getCenter().y;
   };
+
+  // Adds faded circle
+
+  let circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
+
+  circle.onResizeCallback = function () {
+    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
+    if (squareness > 0.6) scale *= 0.8;
+    this.setScale(scale * 0.6);
+    if (!isLandscape) {
+      this.y = currentHeight / 1.35;
+      this.x = currentWidth / 2;
+    } else {
+      this.y = currentHeight / 1.8;
+      this.x = currentWidth / 1.35;
+    }
+  };
+  circle.onResizeCallback();
 
   // Adds button
 
@@ -247,11 +271,11 @@ function startGame() {
     let scale = currentWidth / this.width;
     this.setScale(scale);
     if (!isLandscape) {
-      this.y = currentHeight / 1.05;
-      this.x = currentWidth / 2;
+      this.y = (currentHeight + circle.getBottomCenter().y) / 2;
+      this.x = circle.x;
     } else {
-      this.y = currentHeight / 1.07;
-      this.x = currentWidth / 1.35;
+      this.y = (currentHeight + circle.getBottomCenter().y) / 2;
+      this.x = circle.x;
     }
   };
 
@@ -281,8 +305,8 @@ function startGame() {
     onUpdate: function () {
       buttonText.onResizeCallback();
     },
-    scaleX: {from: button.scaleX * 0.8, to: button.scaleX * 0.9},
-    scaleY: {from: button.scaleY * 0.8, to: button.scaleY * 0.9},
+    scaleX: {from: button.scaleX * 0.6, to: button.scaleX * 0.7},
+    scaleY: {from: button.scaleY * 0.6, to: button.scaleY * 0.7},
     yoyo: true,
   });
 
@@ -321,37 +345,20 @@ function startGame() {
     this.x = scoreBoard.x + this.displayWidth / 2.3;
   };
 
-  // Adds faded circle
-
-  let circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
-
-  circle.onResizeCallback = function () {
-    let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
-    this.setScale(scale * 0.6);
-    if (!isLandscape) {
-      this.y = currentHeight / 1.35;
-      this.x = currentWidth / 2;
-    } else {
-      this.y = currentHeight / 1.8;
-      this.x = currentWidth / 1.35;
-    }
-  };
-  circle.onResizeCallback();
-
   // Adds non-visible board for to scale puzzle area and boxes
 
   let board = this.add.rectangle(0, 0, 5, 4, "0x00000");
   board.setAlpha(0.5);
 
   board.onResizeCallback = function () {
-    let scale = Math.min((currentWidth * 0.8) / this.width, (currentHeight * 0.8) / this.height);
-
+    let scale = Math.min((currentWidth * 0.8) / this.width, (currentHeight * 0.65) / this.height);
+    if (squareness > 0.6) scale *= 0.8;
     if (!isLandscape) {
       this.setScale(scale);
       this.y = currentHeight / 3.5;
       this.x = currentWidth / 2;
     } else {
-      this.setScale(scale * 0.8);
+      this.setScale(scale);
       this.y = currentHeight / 1.8;
       this.x = currentWidth / 4;
     }
@@ -373,6 +380,7 @@ function startGame() {
         this.y = board.getTopLeft().y + i * this.displayHeight;
         this.x = board.getTopLeft().x + this.displayWidth * j;
       };
+      box.onResizeCallback();
       boxArray.push(box);
     }
   }
@@ -474,9 +482,8 @@ function startGame() {
     this.setScale(scale);
     hand.y = textLetters[0].getBottomCenter().y;
     hand.x = textLetters[0].getBottomCenter().x;
+    handTimeline();
   };
-  hand.onResizeCallback();
-  handTimeline();
 
   // Adds lines between letters due to pointer move
 
@@ -557,6 +564,7 @@ function startGame() {
       clickedLettersArray.push(clickedLetters.text);
     });
   }
+
   // Removes green circle tweens and small sized letters when the pointer is up
 
   let alreadySelected = [];
@@ -578,7 +586,6 @@ function startGame() {
       alreadySelected.push(selectedWord);
     }
 
-    console.log(alreadySelected);
     // Removes color circles when pointer is up
 
     for (let items of circleArray) items.isSelected = false;
@@ -594,12 +601,12 @@ function startGame() {
         yoyo: false,
       });
     }
-
     lineGfx.clear();
     lineGfx.lineStyle(16, green, 1);
     pointerGfx.clear();
     firstLetter = undefined;
   });
+  main.resizeNow();
 }
 
 function nonGridWords() {
@@ -653,6 +660,7 @@ function containerWords() {
         });
       }
       timeline.play();
+
       displayedLettersArray = [];
       clickedLettersArray = [];
       rectArray = [];
@@ -701,46 +709,26 @@ function gridWords(wordObj) {
   });
 
   let increment = 0;
-  let delay = 200;
-  // displayedLettersArray.forEach((element,i,array) => {
-  //});
 
   for (let letter of displayedLettersArray) {
     // Fills grid boxes when letters arrived
+    let paint = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
 
-    // boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].setTintFill(green);
-    let colorObj = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
     // Relocates letters through the board
     timeline.add({
       targets: letter,
       x: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().x,
       y: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().y,
       duration: 200,
-      //delay: (i + 1) * delay,
       ease: "Linear",
       onStart: function () {
-        colorObj.setTintFill(green);
+        paint.setTintFill(green);
       },
     });
 
     if (wordObj.direction === "H") increment++;
     else increment += boxData[0].length;
   }
-
-  // for (let boxes of displayedLettersArray) {
-  //   timeline.add({
-  //     targets: boxes,
-  //     duration: 200,
-  //     ease: "Linear",
-  //     onStart: function () {
-  //       console.log(increment);
-  //       boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].setTintFill(green);
-  //     },
-  //   });
-
-  //   if (wordObj.direction === "H") increment++;
-  //   else increment += boxData[0].length;
-  // }
   timeline.play();
 }
 
@@ -788,6 +776,7 @@ function handTimeline() {
     },
   });
   timeline.play();
+  scene.tweens.killTweensOf(hand);
 }
 
 function updateGame(time, delta) {
