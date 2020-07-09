@@ -1,3 +1,4 @@
+//  TO DO LIST
+
 // slideLetters
-// scales
-//
+// isGameFinished
