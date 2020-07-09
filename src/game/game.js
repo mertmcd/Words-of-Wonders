@@ -475,6 +475,7 @@ function startGame() {
     hand.y = textLetters[0].getBottomCenter().y;
     hand.x = textLetters[0].getBottomCenter().x;
   };
+  hand.onResizeCallback();
   handTimeline();
 
   // Adds lines between letters due to pointer move
@@ -700,27 +701,50 @@ function gridWords(wordObj) {
   });
 
   let increment = 0;
+  let delay = 200;
+  // displayedLettersArray.forEach((element,i,array) => {
+  //});
 
   for (let letter of displayedLettersArray) {
     // Fills grid boxes when letters arrived
-    // boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1]].setTintFill(0x000000); // not working yet
 
+    // boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].setTintFill(green);
+    let colorObj = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
     // Relocates letters through the board
     timeline.add({
       targets: letter,
       x: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().x,
       y: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().y,
       duration: 200,
+      //delay: (i + 1) * delay,
       ease: "Linear",
+      onStart: function () {
+        colorObj.setTintFill(green);
+      },
     });
 
     if (wordObj.direction === "H") increment++;
     else increment += boxData[0].length;
   }
+
+  // for (let boxes of displayedLettersArray) {
+  //   timeline.add({
+  //     targets: boxes,
+  //     duration: 200,
+  //     ease: "Linear",
+  //     onStart: function () {
+  //       console.log(increment);
+  //       boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].setTintFill(green);
+  //     },
+  //   });
+
+  //   if (wordObj.direction === "H") increment++;
+  //   else increment += boxData[0].length;
+  // }
   timeline.play();
 }
 
-function slideLetter() {}
+function slideLetters() {}
 
 function handTimeline() {
   timeline = scene.tweens.createTimeline();
