@@ -340,10 +340,10 @@ function startGame() {
     .setOrigin(0.5);
 
   score.onResizeCallback = function () {
-    let scale = scoreBoard.displayWidth / this.width;
-    this.setScale(scale / 5);
+    let scale = scoreBoard.displayWidth / 5 / this.width;
+    this.setScale(scale);
     this.y = scoreBoard.y;
-    this.x = scoreBoard.x + this.displayWidth / 2.3;
+    this.x = scoreBoard.x + this.displayWidth;
   };
 
   // Adds non-visible board for to scale puzzle area and boxes
