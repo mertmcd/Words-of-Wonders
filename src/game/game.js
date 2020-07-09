@@ -59,22 +59,22 @@ let boxData = [
 ];
 let words = {
   BEAT: {
-    position: "V",
+    direction: "V",
     pos: [0, 2],
     inGrid: true,
   },
   BETA: {
-    position: "H",
+    direction: "H",
     pos: [1, 1],
     inGrid: true,
   },
   BET: {
-    position: "H",
+    direction: "H",
     pos: [3, 0],
     inGrid: true,
   },
   BAT: {
-    position: "V",
+    direction: "V",
     pos: [0, 4],
     inGrid: true,
   },
@@ -111,7 +111,10 @@ let clickedLetters;
 let clickedLettersArray;
 let rects;
 let rectArray;
+let score;
 let displayedLettersArray;
+let green = 0x7ab831;
+let scoreBoard;
 let graphics;
 let line;
 let lineX;
@@ -121,6 +124,7 @@ let n = 0;
 let lineGfx;
 let pointerGfx;
 let firstLetter;
+let selectedWord;
 
 let gameData = {};
 
@@ -284,7 +288,7 @@ function startGame() {
 
   // Adds scoreboard
 
-  let scoreBoard = this.add.image(0, 0, "atlas", "extra_word");
+  scoreBoard = this.add.image(0, 0, "atlas", "extra_word");
 
   scoreBoard.onResizeCallback = function () {
     let scale = currentWidth / this.width;
@@ -301,7 +305,7 @@ function startGame() {
 
   // Adds score text
 
-  let score = this.add
+  score = this.add
     .text(0, 0, n, {
       fontFamily: "ui_font_1",
       fontSize: 100,
@@ -314,7 +318,7 @@ function startGame() {
     let scale = scoreBoard.displayWidth / this.width;
     this.setScale(scale / 5);
     this.y = scoreBoard.y;
-    this.x = scoreBoard.x + this.displayWidth / 2;
+    this.x = scoreBoard.x + this.displayWidth / 2.3;
   };
 
   // Adds faded circle
@@ -408,7 +412,7 @@ function startGame() {
     textLetters.push(puzzleText);
   }
 
-  // Adds dummy resize function only for to scale letters positiob on the faded circle
+  // Adds dummy resize function only for to scale letters position on the faded circle
 
   let dummy = this.add.rectangle(0, 0, 0, 0);
 
@@ -422,7 +426,6 @@ function startGame() {
       textLetters[i].x = radius * Math.sin(angle) + circle.getCenter().x;
     }
   };
-
   dummy.onResizeCallback();
 
   // Adds circles behind puzzle texts
@@ -450,7 +453,7 @@ function startGame() {
   let colorCircleArray = [];
 
   for (let i = 0; i < letters.length; i++) {
-    colorCircle = this.add.circle(0, 0, 1, 0x009d00);
+    colorCircle = this.add.circle(0, 0, 1, green);
 
     colorCircle.onResizeCallback = function () {
       this.setScale(0.1);
@@ -474,16 +477,17 @@ function startGame() {
   };
   handTimeline();
 
+  // Adds lines between letters due to pointer move
+
+  lineGfx = scene.add.graphics();
+  lineGfx.lineStyle(16, green, 1);
+  pointerGfx = scene.add.graphics();
+
   // Adds green circle tweens and small sized letters when letters are selected and checks whether the letters are selected or not
 
   displayedLettersArray = [];
   clickedLettersArray = [];
   rectArray = [];
-
-  lineGfx = scene.add.graphics();
-  lineGfx.lineStyle(16, 0x009d00, 1);
-
-  pointerGfx = scene.add.graphics();
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
@@ -502,16 +506,16 @@ function startGame() {
 
       if (!firstLetter) {
         lineGfx.beginPath();
-        lineGfx.moveTo(circleArray[i].x, circleArray[i].y);
+        lineGfx.moveTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
       } else {
-        lineGfx.lineTo(circleArray[i].x, circleArray[i].y);
+        lineGfx.lineTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
       }
 
       lineGfx.strokePath();
 
       firstLetter = circleArray[i];
 
-      rects = scene.add.rectangle(0, 0, 1, 1, 0x009d00).setOrigin(0.5);
+      rects = scene.add.rectangle(0, 0, 1, 1, green).setOrigin(0.5);
 
       rects.onResizeCallback = function () {
         let scale = Math.min((currentWidth * 0.25) / this.width, (currentHeight * 0.25) / this.height);
@@ -550,31 +554,31 @@ function startGame() {
       clickedLetters.onResizeCallback();
       displayedLettersArray.push(clickedLetters);
       clickedLettersArray.push(clickedLetters.text);
-
-      // graphics = scene.add.graphics({lineStyle: {width: 4, color: 0xaa00aa}, fillStyle: {color: 0x0000aa}});
-
-      // line = new Phaser.Geom.Line(circleArray[i].x, circleArray[i].y, circleArray[i].x, circleArray[i].y);
-
-      // line.x2 = pointer.x;
-      // line.y2 = pointer.y;
     });
   }
   // Removes green circle tweens and small sized letters when the pointer is up
 
+  let alreadySelected = [];
   this.input.on("pointerup", function (pointer) {
     console.log(clickedLettersArray);
-    let selectedWord = clickedLettersArray.reduce((current, next) => current + next);
+
+    selectedWord = clickedLettersArray.reduce((current, next) => current + next);
     console.log(words[selectedWord]);
 
-    if (!words[selectedWord]) {
+    if (!words[selectedWord] || alreadySelected.includes(selectedWord)) {
       nonGridWords();
     } else if (!words[selectedWord].inGrid) {
-      nonGridWords();
+      containerWords();
       n += 1;
-      console.log(n);
+      score.text = n;
+      alreadySelected.push(selectedWord);
     } else {
       gridWords(words[selectedWord]);
+      alreadySelected.push(selectedWord);
     }
+
+    console.log(alreadySelected);
+    // Removes color circles when pointer is up
 
     for (let items of circleArray) items.isSelected = false;
 
@@ -591,27 +595,77 @@ function startGame() {
     }
 
     lineGfx.clear();
-    lineGfx.lineStyle(16, 0x009d00, 1);
+    lineGfx.lineStyle(16, green, 1);
     pointerGfx.clear();
     firstLetter = undefined;
   });
 }
 
 function nonGridWords() {
-  for (let lttrs of displayedLettersArray) lttrs.destroy();
-  for (let rcts of rectArray) rcts.destroy();
+  scene.tweens.add({
+    targets: rectArray,
+    duration: 200,
+    ease: "Linear",
+    repeat: 0,
+    //scaleX: {from: rects.scaleX, to: rects.scaleX * 1.6},
+    scaleY: {from: rects.scaleY, to: rects.scaleY * 1.6},
+    alpha: {from: 1, to: 0},
+    yoyo: false,
+    onStart: function () {
+      scene.tweens.add({
+        targets: displayedLettersArray,
+        duration: 50,
+        ease: "Linear",
+        repeat: 0,
+        alpha: {from: 1, to: 0},
+        yoyo: false,
+      });
+      displayedLettersArray = [];
+      clickedLettersArray = [];
+      rectArray = [];
+    },
+  });
+}
 
-  displayedLettersArray = [];
-  clickedLettersArray = [];
-  rectArray = [];
+function containerWords() {
+  scene.tweens.add({
+    targets: rectArray,
+    duration: 200,
+    ease: "Linear",
+    repeat: 0,
+    //scaleX: {from: rects.scaleX, to: rects.scaleX * 1.6},
+    scaleY: {from: rects.scaleY, to: rects.scaleY * 1.6},
+    alpha: {from: 1, to: 0},
+    yoyo: false,
+    onStart: function () {
+      let timeline = scene.tweens.createTimeline();
+      for (let letter of displayedLettersArray) {
+        timeline.add({
+          targets: letter,
+          duration: 200,
+          ease: "Linear",
+          x: scoreBoard.getCenter().x,
+          y: scoreBoard.getCenter().y,
+          scaleX: {from: letter.scaleX, to: letter.scaleX * 0.1},
+          scaleY: {from: letter.scaleY, to: letter.scaleY * 0.1},
+          alpha: {from: 1, to: 0},
+        });
+      }
+      timeline.play();
+      displayedLettersArray = [];
+      clickedLettersArray = [];
+      rectArray = [];
+    },
+  });
 }
 
 function gridWords(wordObj) {
   let timeline = scene.tweens.createTimeline();
 
+  // At first enlarges rects while shirinking letters. Then, sets rects' alphas while enlarging them
   timeline.add({
     targets: rectArray,
-    duration: 500,
+    duration: 200,
     ease: "Linear",
     repeat: 0,
     scaleX: {from: rects.scaleX, to: rects.scaleX * 1.2},
@@ -620,73 +674,52 @@ function gridWords(wordObj) {
     onStart: function () {
       scene.tweens.add({
         targets: displayedLettersArray,
-        duration: 500,
+        duration: 200,
         ease: "Linear",
         repeat: 0,
-        scaleX: {from: displayedLettersArray[0].scaleX * 1, to: displayedLettersArray[0].scaleX * 0.8},
-        scaleY: {from: displayedLettersArray[0].scaleY * 1, to: displayedLettersArray[0].scaleY * 0.8},
+        scaleX: {from: displayedLettersArray[0].scaleX, to: displayedLettersArray[0].scaleX * 0.8},
+        scaleY: {from: displayedLettersArray[0].scaleY, to: displayedLettersArray[0].scaleY * 0.8},
         yoyo: true,
       });
     },
     onComplete: function () {
-      //for (let lttrs of displayedLettersArray) lttrs.destroy();
-      //for (let rcts of rectArray) rcts.destroy();
-      //clickedLettersArray = [];
-      //displayedLettersArray = [];
-      //rectArray = [];
+      scene.tweens.add({
+        targets: rectArray,
+        duration: 200,
+        ease: "Linear",
+        repeat: 0,
+        //scaleX: {from: rects.scaleX, to: rects.scaleX * 1.6},
+        scaleY: {from: rects.scaleY, to: rects.scaleY * 1.6},
+        alpha: {from: 1, to: 0},
+        yoyo: false,
+      });
+      displayedLettersArray = [];
+      clickedLettersArray = [];
+      rectArray = [];
     },
   });
 
   let increment = 0;
+
   for (let letter of displayedLettersArray) {
-    boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1]].setTintFill(0x000000);
+    // Fills grid boxes when letters arrived
+    // boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1]].setTintFill(0x000000); // not working yet
+
+    // Relocates letters through the board
     timeline.add({
       targets: letter,
       x: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().x,
       y: boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment].getCenter().y,
-      duration: 500,
+      duration: 200,
       ease: "Linear",
-      onComplete: function () {},
     });
-    if (wordObj.position === "H") {
-      increment++;
-      console.log("hhhh");
-    } else {
-      increment += boxData[0].length;
-    }
+
+    if (wordObj.direction === "H") increment++;
+    else increment += boxData[0].length;
   }
-  timeline.add({
-    targets: rectArray,
-    duration: 500,
-    ease: "Linear",
-    repeat: 0,
-    //scaleX: {from: rects.scaleX, to: rects.scaleX * 1.6},
-    scaleY: {from: rects.scaleY, to: rects.scaleY * 1.6},
-    alpha: {from: 1, to: 0},
-    yoyo: false,
-    onStart: function () {},
-  });
-
-  // let tween = scene.tweens.add({
-  //   targets: rectArray,
-  //   duration: 1000,
-  //   ease: "Linear",
-  //   repeat: 0,
-  //   scaleX: {from: rects.scaleX, to: rects.scaleX * 1.2},
-  //   scaleY: {from: rects.scaleY, to: rects.scaleY * 1.2},
-  //   yoyo: false,
-  //   onComplete: function () {
-  //     for (let lttrs of displayedLettersArray) lttrs.destroy();
-  //     for (let rcts of rectArray) rcts.destroy();
-
-  //     clickedLettersArray = [];
-  //     displayedLettersArray = [];
-  //     rectArray = [];
-  //   },
-  // });
-
   timeline.play();
 }
+
 function slideLetter() {}
 
 function handTimeline() {
@@ -746,7 +779,7 @@ function updateGame(time, delta) {
     hand.destroy();
   }
   if (firstLetter) {
-    pointerGfx.clear().lineStyle(10, 0x009d00).lineBetween(firstLetter.x, firstLetter.y, pointer.x, pointer.y);
+    pointerGfx.clear().lineStyle(16, green).lineBetween(firstLetter.x, firstLetter.y, pointer.x, pointer.y);
   }
 }
 
