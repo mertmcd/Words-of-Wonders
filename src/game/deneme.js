@@ -1,4 +1,6 @@
 //  TO DO LIST
 
 // slideLetters
-// isGameFinished
+// letter bugs
+// refBox  702 bak
+// 718 ilk push

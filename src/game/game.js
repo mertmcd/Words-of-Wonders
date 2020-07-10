@@ -105,6 +105,7 @@ let columns = boxData[0].length;
 let rows = boxData.length;
 let currentBox = [];
 let board;
+let indx;
 let circle;
 let finishBack;
 let button;
@@ -699,13 +700,24 @@ function pointerEvents(i) {
     .setOrigin(0.5);
 
   clickedLetters.onResizeCallback = function () {
-    let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
-    this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
-    this.y = rects.getCenter().y;
-    this.x = rects.getCenter().x;
+    scene.tweens.killTweensOf(clickedLetters);
+    if (this.tweenStarted) {
+      this.refBox.setTintFill(green);
+      let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+      this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
+      this.y = this.refBox.getCenter().y;
+      this.x = this.refBox.getCenter().x;
+    } else {
+      let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+      this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
+      this.y = rects.getCenter().y;
+      this.x = rects.getCenter().x;
+    }
   };
-  clickedLetters.onResizeCallback();
   displayedLettersArray.push(clickedLetters);
+  slideLetters();
+  clickedLetters.onResizeCallback();
+
   clickedLettersArray.push(clickedLetters.text);
 }
 
@@ -807,11 +819,14 @@ function gridWords(wordObj) {
       rectArray = [];
     },
   });
+
   let increment = 0;
   for (let letter of displayedLettersArray) {
     // Fills grid boxes when letters arrived
 
     let paintBox = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
+    letter.tweenStarted = true;
+    letter.refBox = paintBox;
 
     // Relocates letters through the board
     timeline.add({
@@ -837,11 +852,20 @@ function gridWords(wordObj) {
     if (wordObj.direction === "H") increment++;
     else increment += boxData[0].length;
   }
-
   timeline.play();
 }
 
-function slideLetters() {}
+function slideLetters() {
+  let initPos = {
+    x: circle.x - ((rectArray.length - 1) * rects.displayWidth) / 2,
+  };
+
+  for (let i = 0; i < rectArray.length; i++) {
+    rectArray[i].x = initPos.x;
+    initPos.x = initPos.x + rects.displayWidth;
+    displayedLettersArray[i].x = rectArray[i].x;
+  }
+}
 
 function handTimeline() {
   timeline = scene.tweens.createTimeline();
