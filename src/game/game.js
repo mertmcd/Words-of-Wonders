@@ -105,6 +105,7 @@ let columns = boxData[0].length;
 let rows = boxData.length;
 let currentBox = [];
 let board;
+let circle;
 let finishBack;
 let button;
 let buttonText;
@@ -126,10 +127,6 @@ let score;
 let displayedLettersArray;
 let green = 0x7ab831;
 let scoreBoard;
-let graphics;
-let line;
-let lineX;
-let lineY;
 let circleArray;
 let n = 0;
 let lineGfx;
@@ -137,7 +134,8 @@ let pointerGfx;
 let firstLetter;
 let selectedWord;
 let gameFinished = false;
-let checkEnd;
+let colorCircleArray;
+let finishTween;
 
 let gameData = {};
 
@@ -213,7 +211,7 @@ function startGame() {
 
   // ADD SCREEN ELEMENTS
 
-  // Adds background image
+  // Adds start and finish backgrounds
 
   let backGround = this.add.image(0, 0, "bg").setOrigin(0);
 
@@ -222,13 +220,23 @@ function startGame() {
     this.setScale(scale);
   };
 
-  finishBack = this.add.rectangle(0, 0, 2, 1, 0x00000).setOrigin(0).setAlpha(0.7).setDepth(2);
+  finishBack = this.add.rectangle(0, 0, 2, 1, 0x00000).setOrigin(0).setAlpha(0).setDepth(2);
 
   finishBack.onResizeCallback = function (w, h) {
     let scale = Math.max(w / this.width, h / this.height);
     this.setScale(scale);
   };
-  finishBack.setVisible(false);
+  finishBack.setVisible(true);
+
+  finishTween = scene.tweens.add({
+    targets: finishBack,
+    duration: 1000,
+    ease: "Linear",
+    repeat: 0,
+    alpha: {from: 0, to: 0.7},
+    yoyo: false,
+    paused: true,
+  });
 
   // Adds header rectangle
 
@@ -289,7 +297,7 @@ function startGame() {
 
   // Adds faded circle
 
-  let circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
+  circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
 
   circle.onResizeCallback = function () {
     let scale = Math.min(currentWidth / this.width, currentHeight / this.height);
@@ -550,7 +558,7 @@ function startGame() {
 
   // Adds green circles of letters' background for tween
 
-  let colorCircleArray = [];
+  colorCircleArray = [];
 
   for (let i = 0; i < letters.length; i++) {
     colorCircle = this.add.circle(0, 0, 1, green);
@@ -591,64 +599,12 @@ function startGame() {
 
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
-      if (circleArray[i].isSelected) return;
-      circleArray[i].isSelected = true;
+      if (!pointer.isDown) return;
+      pointerEvents(i);
+    });
 
-      let clickTween = scene.tweens.add({
-        targets: colorCircleArray[i],
-        duration: 100,
-        ease: "Linear",
-        repeat: 0,
-        scaleX: {from: 0, to: letterCircle.scaleX},
-        scaleY: {from: 0, to: letterCircle.scaleY},
-        yoyo: false,
-      });
-
-      if (!firstLetter) {
-        lineGfx.beginPath();
-        lineGfx.moveTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
-      } else {
-        lineGfx.lineTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
-      }
-
-      lineGfx.strokePath();
-
-      firstLetter = circleArray[i];
-
-      rects = scene.add.rectangle(0, 0, 1, 1, green).setOrigin(0.5);
-
-      rects.onResizeCallback = function () {
-        let scale = Math.min((currentWidth * 0.25) / this.width, (currentHeight * 0.25) / this.height);
-        this.setScale(scale / 2.5);
-        if (!isLandscape) {
-          this.y = currentHeight / 1.9;
-          this.x = circle.x + displayedLettersArray.length * 80;
-        } else {
-          this.y = currentHeight / 5;
-          this.x = circle.x + displayedLettersArray.length * 80;
-        }
-      };
-      rects.onResizeCallback();
-      rectArray.push(rects);
-
-      clickedLetters = scene.add
-        .text(0, 0, textLetters[i].text, {
-          fontFamily: "ui_font_1",
-          fontSize: 100,
-          color: "#ffffff",
-          strokeThickness: 1.5,
-        })
-        .setOrigin(0.5);
-
-      clickedLetters.onResizeCallback = function () {
-        let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
-        this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
-        this.y = rects.getCenter().y;
-        this.x = rects.getCenter().x;
-      };
-      clickedLetters.onResizeCallback();
-      displayedLettersArray.push(clickedLetters);
-      clickedLettersArray.push(clickedLetters.text);
+    circleArray[i].on("pointerdown", function (pointer) {
+      pointerEvents(i);
     });
   }
 
@@ -656,8 +612,6 @@ function startGame() {
 
   let alreadySelected = [];
   this.input.on("pointerup", function (pointer) {
-    //console.log(clickedLettersArray);
-
     selectedWord = clickedLettersArray.reduce((current, next) => current + next);
 
     if (!words[selectedWord] || alreadySelected.includes(selectedWord)) {
@@ -692,6 +646,67 @@ function startGame() {
     pointerGfx.clear();
     firstLetter = undefined;
   });
+}
+
+function pointerEvents(i) {
+  if (circleArray[i].isSelected) return;
+  circleArray[i].isSelected = true;
+
+  let clickTween = scene.tweens.add({
+    targets: colorCircleArray[i],
+    duration: 100,
+    ease: "Linear",
+    repeat: 0,
+    scaleX: {from: 0, to: letterCircle.scaleX},
+    scaleY: {from: 0, to: letterCircle.scaleY},
+    yoyo: false,
+  });
+
+  if (!firstLetter) {
+    lineGfx.beginPath();
+    lineGfx.moveTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
+  } else {
+    lineGfx.lineTo(circleArray[i].getCenter().x, circleArray[i].getCenter().y);
+  }
+
+  lineGfx.strokePath();
+
+  firstLetter = circleArray[i];
+
+  rects = scene.add.rectangle(0, 0, 1, 1, green).setOrigin(0.5);
+
+  rects.onResizeCallback = function () {
+    let scale = Math.min((currentWidth * 0.25) / this.width, (currentHeight * 0.25) / this.height);
+    this.setScale(scale / 2.5);
+    if (!isLandscape) {
+      this.y = currentHeight / 1.9;
+      this.x = circle.x + displayedLettersArray.length * 80;
+    } else {
+      this.y = currentHeight / 5;
+      this.x = circle.x + displayedLettersArray.length * 80;
+    }
+  };
+  rects.onResizeCallback();
+  rectArray.push(rects);
+
+  clickedLetters = scene.add
+    .text(0, 0, textLetters[i].text, {
+      fontFamily: "ui_font_1",
+      fontSize: 100,
+      color: "#ffffff",
+      strokeThickness: 1.5,
+    })
+    .setOrigin(0.5);
+
+  clickedLetters.onResizeCallback = function () {
+    let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
+    this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
+    this.y = rects.getCenter().y;
+    this.x = rects.getCenter().x;
+  };
+  clickedLetters.onResizeCallback();
+  displayedLettersArray.push(clickedLetters);
+  clickedLettersArray.push(clickedLetters.text);
 }
 
 function nonGridWords() {
@@ -907,10 +922,10 @@ function updateGame(time, delta) {
     button2Text.setVisible(true);
     finishText.setVisible(true);
     finishBack.setVisible(true);
+    finishTween.play();
     button.setVisible(false);
     buttonText.setVisible(false);
     scene.input.enabled = false;
-    console.log(gameFinished);
   }
 }
 
