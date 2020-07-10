@@ -62,21 +62,25 @@ let words = {
     direction: "V",
     pos: [0, 2],
     inGrid: true,
+    painted: false,
   },
   BETA: {
     direction: "H",
     pos: [1, 1],
     inGrid: true,
+    painted: false,
   },
   BET: {
     direction: "H",
     pos: [3, 0],
     inGrid: true,
+    painted: false,
   },
   BAT: {
     direction: "V",
     pos: [0, 4],
     inGrid: true,
+    painted: false,
   },
   EAT: {
     inGrid: false,
@@ -126,6 +130,8 @@ let lineGfx;
 let pointerGfx;
 let firstLetter;
 let selectedWord;
+let gameFinished = false;
+let checkEnd;
 
 let gameData = {};
 
@@ -565,10 +571,9 @@ function startGame() {
 
   let alreadySelected = [];
   this.input.on("pointerup", function (pointer) {
-    console.log(clickedLettersArray);
+    //console.log(clickedLettersArray);
 
     selectedWord = clickedLettersArray.reduce((current, next) => current + next);
-    console.log(words[selectedWord]);
 
     if (!words[selectedWord] || alreadySelected.includes(selectedWord)) {
       nonGridWords();
@@ -602,7 +607,6 @@ function startGame() {
     pointerGfx.clear();
     firstLetter = undefined;
   });
-  main.resizeNow();
 }
 
 function nonGridWords() {
@@ -703,12 +707,11 @@ function gridWords(wordObj) {
       rectArray = [];
     },
   });
-
   let increment = 0;
-
   for (let letter of displayedLettersArray) {
     // Fills grid boxes when letters arrived
-    let paint = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
+
+    let paintBox = boxArray[wordObj.pos[0] * boxData[0].length + wordObj.pos[1] + increment];
 
     // Relocates letters through the board
     timeline.add({
@@ -718,21 +721,25 @@ function gridWords(wordObj) {
       duration: 200,
       ease: "Linear",
       onStart: function () {
-        paint.setTintFill(green);
+        paintBox.setTintFill(green);
       },
       onComplete: function () {
         letter.onResizeCallback = function () {
           let scale = Math.min(board.displayWidth / this.width, board.displayHeight / this.height);
           this.setScale(Math.max((scale * 0.7) / rows, (scale * 0.7) / columns));
-          this.y = paint.getCenter().y;
-          this.x = paint.getCenter().x;
+          this.y = paintBox.getCenter().y;
+          this.x = paintBox.getCenter().x;
         };
       },
     });
+    words[selectedWord].painted = true;
 
     if (wordObj.direction === "H") increment++;
     else increment += boxData[0].length;
   }
+
+  checkEnd = [];
+
   timeline.play();
 }
 
@@ -783,6 +790,16 @@ function handTimeline() {
   scene.tweens.killTweensOf(hand);
 }
 
+function isGameEnd() {
+  let isEnd = true;
+  Object.keys(words).forEach((element) => {
+    if (words[element].painted !== undefined) {
+      isEnd = isEnd && words[element].painted;
+    }
+  });
+  return isEnd;
+}
+
 function updateGame(time, delta) {
   currentTime = time;
   deltaTime = delta;
@@ -791,12 +808,17 @@ function updateGame(time, delta) {
 
   let pointer = this.input.activePointer;
 
-  if (pointer.isDown) {
+  if (pointer.isDown && !gameFinished) {
     timeline.stop();
     hand.destroy();
   }
   if (firstLetter) {
     pointerGfx.clear().lineStyle(16, green).lineBetween(firstLetter.x, firstLetter.y, pointer.x, pointer.y);
+  }
+
+  if (isGameEnd() && !gameFinished) {
+    gameFinished = true;
+    console.log(gameFinished);
   }
 }
 
