@@ -105,6 +105,12 @@ let columns = boxData[0].length;
 let rows = boxData.length;
 let currentBox = [];
 let board;
+let finishBack;
+let button;
+let buttonText;
+let button2;
+let button2Text;
+let finishText;
 let letters = ["B", "E", "T", "A"];
 let textLetters = [];
 let puzzleText;
@@ -216,6 +222,14 @@ function startGame() {
     this.setScale(scale);
   };
 
+  finishBack = this.add.rectangle(0, 0, 2, 1, 0x00000).setOrigin(0).setAlpha(0.7).setDepth(2);
+
+  finishBack.onResizeCallback = function (w, h) {
+    let scale = Math.max(w / this.width, h / this.height);
+    this.setScale(scale);
+  };
+  finishBack.setVisible(false);
+
   // Adds header rectangle
 
   let rect = this.add.rectangle(0, 0, 2, 1, 0x000000).setOrigin(0);
@@ -252,6 +266,27 @@ function startGame() {
     this.y = rect.getCenter().y;
   };
 
+  // Add finish text
+  finishText = this.add
+    .text(0, 0, "Well Done!", {
+      fontFamily: "ui_font_1",
+      fontSize: 100,
+      color: "#ffffff",
+      strokeThickness: 1.5,
+    })
+    .setOrigin(0.5)
+    .setDepth(3)
+    .setVisible(false);
+
+  finishText.onResizeCallback = function () {
+    let scale = Math.min((rect.displayWidth * 0.8) / this.width, (rect.displayHeight * 0.8) / this.height);
+    if (!isLandscape) this.setScale(scale);
+    else this.setScale(scale);
+
+    this.x = currentWidth / 2;
+    this.y = currentHeight / 2;
+  };
+
   // Adds faded circle
 
   let circle = this.add.circle(0, 0, 1, 0x000000, 0.4).setOrigin(0.5);
@@ -272,7 +307,7 @@ function startGame() {
 
   // Adds button
 
-  let button = this.add.image(0, 0, "atlas", "install0");
+  button = this.add.image(0, 0, "atlas", "install0");
 
   button.onResizeCallback = function () {
     let scale = currentWidth / this.width;
@@ -285,23 +320,60 @@ function startGame() {
       this.x = circle.x;
     }
   };
+  button.setVisible(false);
+
+  button2 = this.add.image(0, 0, "atlas", "install_simple").setOrigin(0.5).setDepth(3);
+
+  button2.onResizeCallback = function () {
+    let scale = currentWidth / this.width;
+
+    if (!isLandscape) {
+      this.setScale(scale * 0.8);
+      this.y = currentHeight / 1.7;
+      this.x = currentWidth / 2;
+    } else {
+      this.setScale(scale * 0.4);
+      this.y = currentHeight / 1.5;
+      this.x = currentWidth / 2;
+    }
+  };
+  button2.setVisible(false);
 
   // Adds text inside the button and its tween
 
-  let buttonText = this.add
+  buttonText = this.add
     .text(0, 0, "Tap to Play!", {
       fontFamily: "ui_font_1",
       fontSize: 100,
       color: "#ffffff",
       strokeThickness: 1.5,
     })
-    .setOrigin(0.5);
+    .setOrigin(0.5)
+    .setVisible(false);
 
   buttonText.onResizeCallback = function () {
     let scale = Math.min((button.displayWidth * 0.6) / this.width, (button.displayHeight * 0.6) / this.height);
     this.setScale(scale);
     this.y = button.y;
     this.x = button.x;
+  };
+
+  button2Text = this.add
+    .text(0, 0, "Continue", {
+      fontFamily: "ui_font_1",
+      fontSize: 100,
+      color: "#1E9FFC",
+      strokeThickness: 1.5,
+    })
+    .setOrigin(0.5)
+    .setDepth(4)
+    .setVisible(false);
+
+  button2Text.onResizeCallback = function () {
+    let scale = Math.min((button2.displayWidth * 0.6) / this.width, (button2.displayHeight * 0.6) / this.height);
+    this.setScale(scale);
+    this.y = button2.y;
+    this.x = button2.x;
   };
 
   let buttonTween = scene.tweens.add({
@@ -311,6 +383,19 @@ function startGame() {
     repeat: -1,
     onUpdate: function () {
       buttonText.onResizeCallback();
+    },
+    scaleX: {from: button.scaleX * 0.6, to: button.scaleX * 0.7},
+    scaleY: {from: button.scaleY * 0.6, to: button.scaleY * 0.7},
+    yoyo: true,
+  });
+
+  let button2Tween = scene.tweens.add({
+    targets: button2,
+    duration: 600,
+    ease: "Linear",
+    repeat: -1,
+    onUpdate: function () {
+      button2Text.onResizeCallback();
     },
     scaleX: {from: button.scaleX * 0.6, to: button.scaleX * 0.7},
     scaleY: {from: button.scaleY * 0.6, to: button.scaleY * 0.7},
@@ -418,7 +503,7 @@ function startGame() {
         strokeThickness: 1.5,
       })
       .setOrigin(0.5)
-      .setDepth(2);
+      .setDepth(1);
 
     puzzleText.onResizeCallback = function () {
       let scale = Math.min((circle.displayWidth * 0.15) / this.width, (circle.displayHeight * 0.3) / this.height);
@@ -738,8 +823,6 @@ function gridWords(wordObj) {
     else increment += boxData[0].length;
   }
 
-  checkEnd = [];
-
   timeline.play();
 }
 
@@ -811,6 +894,8 @@ function updateGame(time, delta) {
   if (pointer.isDown && !gameFinished) {
     timeline.stop();
     hand.destroy();
+    button.setVisible(true);
+    buttonText.setVisible(true);
   }
   if (firstLetter) {
     pointerGfx.clear().lineStyle(16, green).lineBetween(firstLetter.x, firstLetter.y, pointer.x, pointer.y);
@@ -818,6 +903,13 @@ function updateGame(time, delta) {
 
   if (isGameEnd() && !gameFinished) {
     gameFinished = true;
+    button2.setVisible(true);
+    button2Text.setVisible(true);
+    finishText.setVisible(true);
+    finishBack.setVisible(true);
+    button.setVisible(false);
+    buttonText.setVisible(false);
+    scene.input.enabled = false;
     console.log(gameFinished);
   }
 }
