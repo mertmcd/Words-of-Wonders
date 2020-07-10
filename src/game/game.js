@@ -719,7 +719,6 @@ function pointerEvents(i) {
   displayedLettersArray.push(clickedLetters);
   slideLetters();
   clickedLetters.onResizeCallback();
-
   clickedLettersArray.push(clickedLetters.text);
 }
 
