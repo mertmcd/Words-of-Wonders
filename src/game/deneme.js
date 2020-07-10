@@ -1,6 +1,10 @@
 //  TO DO LIST
 
-// slideLetters
 // letter bugs
-// refBox  702 bak
+
+// REPEAT
+
+// refBox  702 bak checkd.
 // 718 ilk push
+//lineGfx pointerGfx
+// slideLetters

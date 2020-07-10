@@ -602,6 +602,7 @@ function startGame() {
     circleArray[i].on("pointerover", function (pointer) {
       if (!pointer.isDown) return;
       pointerEvents(i);
+      console;
     });
 
     circleArray[i].on("pointerdown", function (pointer) {
@@ -642,9 +643,10 @@ function startGame() {
         yoyo: false,
       });
     }
+    pointerGfx.clear();
     lineGfx.clear();
     lineGfx.lineStyle(16, green, 1);
-    pointerGfx.clear();
+
     firstLetter = undefined;
   });
 }
@@ -740,9 +742,9 @@ function nonGridWords() {
         alpha: {from: 1, to: 0},
         yoyo: false,
       });
+      rectArray = [];
       displayedLettersArray = [];
       clickedLettersArray = [];
-      rectArray = [];
     },
   });
 }
@@ -802,6 +804,8 @@ function gridWords(wordObj) {
         scaleY: {from: displayedLettersArray[0].scaleY, to: displayedLettersArray[0].scaleY * 0.8},
         yoyo: true,
       });
+      displayedLettersArray = [];
+      clickedLettersArray = [];
     },
     onComplete: function () {
       scene.tweens.add({
@@ -814,8 +818,6 @@ function gridWords(wordObj) {
         alpha: {from: 1, to: 0},
         yoyo: false,
       });
-      displayedLettersArray = [];
-      clickedLettersArray = [];
       rectArray = [];
     },
   });
@@ -836,7 +838,7 @@ function gridWords(wordObj) {
       duration: 200,
       ease: "Linear",
       onStart: function () {
-        paintBox.setTintFill(green);
+        paintBox.setTintFill(green).setAlpha(1);
       },
       onComplete: function () {
         letter.onResizeCallback = function () {
