@@ -932,7 +932,7 @@ function gridWords(wordObj) {
   timeline.play();
 }
 
-function slideLetters() {
+const slideLetters = function () {
   let initPos = {
     x: circle.x - ((rectArray.length - 1) * rects.displayWidth) / 2,
   };
@@ -942,7 +942,7 @@ function slideLetters() {
     initPos.x = initPos.x + rects.displayWidth;
     displayedLettersArray[i].x = rectArray[i].x;
   }
-}
+};
 
 function handTimeline() {
   timeline = scene.tweens.createTimeline();
