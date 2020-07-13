@@ -689,7 +689,9 @@ function startGame() {
   // Removes green circle tweens and small sized letters when the pointer is up
 
   let alreadySelected = [];
+
   this.input.on("pointerup", function (pointer) {
+    if (clickedLettersArray.length === 0) return;
     selectedWord = clickedLettersArray.reduce((current, next) => current + next);
 
     if (!words[selectedWord] || alreadySelected.includes(selectedWord)) {
