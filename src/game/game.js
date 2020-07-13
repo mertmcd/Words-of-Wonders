@@ -681,9 +681,9 @@ function startGame() {
       else pointerEvents(i);
     });
 
-    circleArray[i].on("pointerdown", function (pointer) {
-      pointerEvents(i);
-    });
+    // circleArray[i].on("pointerdown", function (pointer) {
+    //   pointerEvents(i);
+    // });
   }
 
   // Removes green circle tweens and small sized letters when the pointer is up
@@ -725,6 +725,7 @@ function startGame() {
 
     firstLetter = undefined;
   });
+  console.log(boxArray);
 }
 
 function pointerEvents(i) {
