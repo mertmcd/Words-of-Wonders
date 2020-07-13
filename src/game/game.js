@@ -52,52 +52,112 @@ let main, data;
 
 let boxArray = [];
 let boxData = [
-  [0, 0, 1, 0, 1],
-  [0, 1, 1, 1, 1],
-  [0, 0, 1, 0, 1],
-  [1, 1, 1, 0, 0],
+  [1, 1, 1, 1, 1, 1, 0],
+  [1, 0, 0, 0, 0, 1, 0],
+  [1, 0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 0, 1, 0],
+  [1, 0, 1, 0, 1, 1, 1],
+  [1, 1, 1, 0, 1, 0, 1],
+  [1, 0, 0, 0, 1, 1, 1],
 ];
 let words = {
-  BEAT: {
+  DIAMOND: {
     direction: "V",
-    pos: [0, 2],
+    pos: [0, 0],
     inGrid: true,
     painted: false,
   },
-  BETA: {
+  DOMAIN: {
     direction: "H",
-    pos: [1, 1],
+    pos: [0, 0],
     inGrid: true,
     painted: false,
   },
-  BET: {
+  NOMAD: {
+    direction: "V",
+    pos: [0, 5],
+    inGrid: true,
+    painted: false,
+  },
+  MAID: {
     direction: "H",
     pos: [3, 0],
     inGrid: true,
     painted: false,
   },
-  BAT: {
+  MIND: {
     direction: "V",
-    pos: [0, 4],
+    pos: [2, 2],
     inGrid: true,
     painted: false,
   },
-  EAT: {
+  NOD: {
+    direction: "H",
+    pos: [5, 0],
+    inGrid: true,
+    painted: false,
+  },
+  ADD: {
+    direction: "H",
+    pos: [4, 4],
+    inGrid: true,
+    painted: false,
+  },
+  DAD: {
+    direction: "V",
+    pos: [4, 6],
+    inGrid: true,
+    painted: false,
+  },
+  DID: {
+    direction: "H",
+    pos: [6, 4],
+    inGrid: true,
+    painted: false,
+  },
+  AID: {
+    direction: "V",
+    pos: [4, 4],
+    inGrid: true,
+    painted: false,
+  },
+  ADMIN: {
     inGrid: false,
   },
-  TEA: {
+  MAIN: {
     inGrid: false,
   },
-  TAB: {
+  ODD: {
     inGrid: false,
   },
-  ATE: {
+  MID: {
     inGrid: false,
   },
-  BATE: {
+  MAN: {
     inGrid: false,
   },
-  ABET: {
+  DO: {
+    inGrid: false,
+  },
+  DAM: {
+    inGrid: false,
+  },
+  DAMN: {
+    inGrid: false,
+  },
+  AND: {
+    inGrid: false,
+  },
+  AMID: {
+    inGrid: false,
+  },
+  AMINO: {
+    inGrid: false,
+  },
+  MOAN: {
+    inGrid: false,
+  },
+  OMNI: {
     inGrid: false,
   },
 };
@@ -105,7 +165,6 @@ let columns = boxData[0].length;
 let rows = boxData.length;
 let currentBox = [];
 let board;
-let indx;
 let circle;
 let finishBack;
 let button;
@@ -113,7 +172,7 @@ let buttonText;
 let button2;
 let button2Text;
 let finishText;
-let letters = ["B", "E", "T", "A"];
+let letters = ["D", "I", "A", "M", "O", "N", "D"];
 let textLetters = [];
 let puzzleText;
 let letterCircle;
@@ -137,6 +196,7 @@ let selectedWord;
 let gameFinished = false;
 let colorCircleArray;
 let finishTween;
+let mask;
 
 let gameData = {};
 
@@ -313,6 +373,25 @@ function startGame() {
     }
   };
   circle.onResizeCallback();
+
+  mask = this.add.image(0, 0, "atlas", "mask").setOrigin(0.5, 0.63);
+
+  mask.onResizeCallback = function () {
+    let scale = Math.max(currentWidth / this.width, currentHeight / this.height);
+
+    if (!isLandscape) {
+      mask.angle = 0;
+      this.setScale(scale);
+      this.y = circle.y;
+      this.x = circle.x;
+    } else {
+      mask.angle = -90;
+      this.setScale(scale * 0.7);
+      this.y = circle.y;
+      this.x = circle.x;
+    }
+  };
+  mask.onResizeCallback();
 
   // Adds button
 
@@ -934,6 +1013,7 @@ function updateGame(time, delta) {
   if (pointer.isDown && !gameFinished) {
     timeline.stop();
     hand.destroy();
+    mask.setVisible(false);
     button.setVisible(true);
     buttonText.setVisible(true);
   }
