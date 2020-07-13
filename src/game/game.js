@@ -631,7 +631,6 @@ function startGame() {
     letterCircle.onResizeCallback();
     letterCircle.text = textLetters[i];
     circleArray.push(letterCircle);
-    circleArray[i].setVisible(true);
     circleArray[i].setInteractive();
     circleArray[i].isSelected = false;
   }
@@ -650,7 +649,6 @@ function startGame() {
     };
     colorCircle.onResizeCallback();
     colorCircleArray.push(colorCircle);
-    colorCircleArray[i].setVisible(true);
   }
 
   // Adds hand tutorial
@@ -680,8 +678,7 @@ function startGame() {
   for (let i = 0; i < letters.length; i++) {
     circleArray[i].on("pointerover", function (pointer) {
       if (!pointer.isDown) return;
-      pointerEvents(i);
-      console;
+      else pointerEvents(i);
     });
 
     circleArray[i].on("pointerdown", function (pointer) {
